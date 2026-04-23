@@ -22,10 +22,10 @@ class ChatSession(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
-    user: Mapped[User] = relationship("User", back_populates='sessions')
-    project: Mapped[Project] = relationship("Project", back_populates='sessions')
-    messages: Mapped[List[Message]] = relationship("Message", back_populates='session', cascade='all, delete-orphan', lazy="selectin")
-    traces: Mapped[List[GraphTrace]] = relationship("GraphTrace", back_populates='session', cascade='all, delete-orphan', lazy='selectin')
+    user: Mapped["User"] = relationship("User", back_populates='sessions')
+    project: Mapped["Project"] = relationship("Project", back_populates='sessions')
+    messages: Mapped[List["Message"]] = relationship("Message", back_populates='session', cascade='all, delete-orphan', lazy="selectin")
+    traces: Mapped[List["GraphTrace"]] = relationship("GraphTrace", back_populates='session', cascade='all, delete-orphan', lazy='selectin')
 
 
 

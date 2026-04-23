@@ -1,10 +1,11 @@
 from src.infrastructure.core.base import Base 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, ForeignKey, Enum, Text, Integer, JSONB, Boolean, DateTime, func
+from sqlalchemy import String, ForeignKey, Enum, Text, Integer, Boolean, DateTime, func
 import uuid
 import enum
 from typing import Optional, TYPE_CHECKING
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import JSONB
 
 if TYPE_CHECKING:
     from src.infrastructure.models.project import Project
@@ -35,5 +36,5 @@ class Document(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
     processed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    project: Mapped[Project] = relationship("Project", back_populates='documents')
+    project: Mapped["Project"] = relationship("Project", back_populates='documents')
 

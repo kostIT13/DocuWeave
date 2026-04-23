@@ -19,8 +19,8 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), onupdate=func.now())
     
-    sessions: Mapped[List[ChatSession]] = relationship("ChatSession", back_populates='user', cascade='all, delete-orphan', lazy='selectin')
-    projects: Mapped[List[Project]] = relationship("Project", back_populates='user', cascade='all, delete-orphan', lazy='selectin')
+    sessions: Mapped[List["ChatSession"]] = relationship("ChatSession", back_populates='user', cascade='all, delete-orphan', lazy='selectin')
+    projects: Mapped[List["Project"]] = relationship("Project", back_populates='user', cascade='all, delete-orphan', lazy='selectin')
 
     
 
