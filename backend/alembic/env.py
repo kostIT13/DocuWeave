@@ -1,18 +1,23 @@
 import asyncio
+import os
 from logging.config import fileConfig
+
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
-from src.infrastructure.core.base import Base 
+from dotenv import load_dotenv
+
+env_path = os.path.join(os.path.dirname(__file__), "..", "..", ".env")
+load_dotenv(env_path)
+
+from src.infrastructure.core.base import Base
 from src.infrastructure.models.chat_session import ChatSession
 from src.infrastructure.models.document import Document
 from src.infrastructure.models.graph_trace import GraphTrace
 from src.infrastructure.models.message import Message
 from src.infrastructure.models.project import Project
 from src.infrastructure.models.user import User
-
-from src.infrastructure.core.config import settings
 
 config = context.config
 
@@ -21,12 +26,17 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL не найден в .env. Проверьте backend/.env")
+
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 
 def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode (no DB connection)."""
     context.configure(
-        url=settings.DATABASE_URL,
+        url=DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -37,6 +47,7 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
+    """Configure context and run migrations with live DB connection."""
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
@@ -47,11 +58,11 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_async_migrations() -> None:
+    """Run migrations asynchronously (for asyncpg)."""
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        future=True,  
     )
 
     async with connectable.connect() as connection:
@@ -61,6 +72,7 @@ async def run_async_migrations() -> None:
 
 
 def run_migrations_online() -> None:
+    """Entry point for online migrations."""
     asyncio.run(run_async_migrations())
 
 
