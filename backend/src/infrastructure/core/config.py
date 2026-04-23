@@ -1,36 +1,33 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+from pathlib import Path  
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str 
-    LOG_LEVEL: str = "INFO"
-
+    DATABASE_URL: str
     DEBUG: bool = False
-
-    CHROMA_HOST: str 
-    CHROMA_PORT: str 
-    CHROMA_COLLECSTIONS: str 
-
-    OLLAMA_HOST: str 
-    OLLAMA_EMBBEDING_MODEL: str 
-    OLLAMA_LLM: str
-    
-    OPENAI_API_KEY: str | None = None
-    PROJECT_NAME: str = "DocuWeave"
-
-    ENVIRONMENT: str = "developing"
-
-    SECRET_KEY: str
+    LOG_LEVEL: str = "INFO"
+    OLLAMA_HOST: str = "http://ollama:11434"
+    OLLAMA_EMBEDDING_MODEL: str = "nomic-embed-text"
+    OLLAMA_LLM_MODEL: str = "qwen2.5-coder:1.5b"
+    SECRET_KEY: str = "v8Yxl3MvuSevxhmPeLe2unTojoeW9w02f9l0OTiO4bw"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    CHROMA_HOST: str = "chromadb"
+    CHROMA_PORT: str = "8000"
+    
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).resolve().parent.parent.parent.parent / ".env",
+                                              
+        case_sensitive=False,
+        extra="ignore"
+    )
 
 
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
 
-settings = get_settings()
 
+settings = get_settings()
