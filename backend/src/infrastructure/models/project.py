@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from src.infrastructure.models.user import User
     from src.infrastructure.models.document import Document
     from src.infrastructure.models.chat_session import ChatSession
+    from src.infrastructure.models.project_settings_history import ProjectSettingsHistory
 
 
 class Project(Base):
@@ -24,4 +25,6 @@ class Project(Base):
     user: Mapped["User"] = relationship("User", back_populates='projects')
     documents: Mapped[List["Document"]] = relationship("Document", back_populates='project', cascade='all, delete-orphan', lazy='selectin')
     sessions: Mapped[List["ChatSession"]] = relationship("ChatSession", back_populates='project', cascade='all, delete-orphan', lazy='selectin')
-    
+    settings_history: Mapped[List["ProjectSettingsHistory"]] = relationship(
+        "ProjectSettingsHistory", back_populates="project", cascade="all, delete-orphan", lazy="selectin"
+    )

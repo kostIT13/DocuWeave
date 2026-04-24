@@ -8,6 +8,7 @@ from src.infrastructure.models.graph_trace import GraphTrace
 from src.infrastructure.models.message import Message 
 from src.infrastructure.models.project import Project
 from src.infrastructure.models.user import User
+from src.infrastructure.models.project_settings_history import ProjectSettingsHistory
 
 
 setup_logging(level=settings.LOG_LEVEL)

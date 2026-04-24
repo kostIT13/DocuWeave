@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
     from src.infrastructure.models.project import Project
     from src.infrastructure.models.chat_session import ChatSession
+    from src.infrastructure.models.project_settings_history import ProjectSettingsHistory
 
 
 class User(Base):
@@ -22,6 +23,6 @@ class User(Base):
     
     sessions: Mapped[List["ChatSession"]] = relationship("ChatSession", back_populates='user', cascade='all, delete-orphan', lazy='selectin')
     projects: Mapped[List["Project"]] = relationship("Project", back_populates='user', cascade='all, delete-orphan', lazy='selectin')
-
-    
-
+    settings_history: Mapped[List["ProjectSettingsHistory"]] = relationship(
+        "ProjectSettingsHistory", back_populates="user", lazy="selectin"
+    )
