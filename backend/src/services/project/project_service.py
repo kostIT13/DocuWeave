@@ -29,3 +29,4 @@ class ProjectService:
 
     async def delete_project(self, user_id: str, project_id: str) -> bool:
         return await self.repository.delete(project_id, user_id)
+
