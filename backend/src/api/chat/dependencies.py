@@ -5,6 +5,7 @@ from src.infrastructure.core.database import get_db
 from typing import Annotated
 from src.api.auth.dependencies import CurrentUserDependency
 from src.infrastructure.models.chat_session import ChatSession
+from src.services.message.message_service import MessageService
 
 
 async def get_session_service(db: AsyncSession = Depends(get_db)):
@@ -31,3 +32,11 @@ async def get_chat_or_404(
 
 
 ChatDependency = Annotated[ChatSession, Depends(get_chat_or_404)]
+
+
+async def get_message_service(db: AsyncSession = Depends(get_db)):
+    return MessageService(db)
+
+
+MessageServiceDependency = Annotated[MessageService, Depends(get_message_service)]
+
