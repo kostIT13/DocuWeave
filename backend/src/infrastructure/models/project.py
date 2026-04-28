@@ -4,6 +4,7 @@ from sqlalchemy import String, ForeignKey, DateTime, func
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, List
+from sqlalchemy.dialects.postgresql import JSONB
 
 if TYPE_CHECKING:
     from src.infrastructure.models.user import User
@@ -21,6 +22,7 @@ class Project(Base):
     description: Mapped[str] = mapped_column(String(255), nullable=False, default="Описание проекта")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+    settings: Mapped[dict] = mapped_column(JSONB, default=lambda: {}, server_default="{}", nullable=False)
 
     user: Mapped["User"] = relationship("User", back_populates='projects')
     documents: Mapped[List["Document"]] = relationship("Document", back_populates='project', cascade='all, delete-orphan', lazy='selectin')

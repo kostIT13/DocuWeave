@@ -22,5 +22,5 @@ class ProjectSettingsHistory(Base):
     changed_fields: Mapped[dict] = mapped_column(JSONB, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    project: Mapped["Project"] = relationship("Project", back_populates="project_settings_history", lazy='selectin')
-    user: Mapped["User | None"] = relationship("User", back_populates="project_settings_history", lazy='selectin')
+    project: Mapped["Project"] = relationship("Project", back_populates="settings_history", lazy='selectin')
+    user: Mapped["User | None"] = relationship("User", back_populates="settings_history", lazy='selectin')
