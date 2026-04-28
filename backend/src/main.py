@@ -9,9 +9,19 @@ from src.infrastructure.models.message import Message
 from src.infrastructure.models.project import Project
 from src.infrastructure.models.user import User
 from src.infrastructure.models.project_settings_history import ProjectSettingsHistory
+from src.api.auth.endpoints import router as auth_router
+from src.api.chat.endpoints import router as chat_router
+from src.api.document.endpoints import router as document_router
+from src.api.project.endpoints import router as project_router
+
 
 
 setup_logging(level=settings.LOG_LEVEL)
 
 
 app = FastAPI(titel='DocuWeave', lifespan=lifespan, description='Local AI Document Assistant')
+
+app.include_router(auth_router)
+app.include_router(chat_router)
+app.include_router(document_router)
+app.include_router(project_router)
