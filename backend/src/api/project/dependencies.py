@@ -6,6 +6,15 @@ from src.infrastructure.models.project import Project
 from src.infrastructure.core.database import get_db
 from src.api.auth.dependencies import CurrentUserDependency
 from typing import Annotated
+from src.services.project.project_service import ProjectService
+from src.services.project_settings_history.history_service import SettingsHistoryService
+
+
+async def get_project_service(db: AsyncSession = Depends(get_db)):
+    return ProjectService(db)
+
+
+ProjectServiceDependency = Annotated[ProjectService, Depends(get_project_service)]
 
 
 async def get_current_project(
@@ -39,3 +48,11 @@ async def get_current_project(
 
 
 CurrentProjectDependency = Annotated[Project, Depends(get_current_project)]
+
+
+async def get_settings_history_service(db: AsyncSession = Depends(get_db)):
+    return SettingsHistoryService(db)
+
+
+SettingsHistoryServiceDependency = Annotated[SettingsHistoryService, Depends(get_settings_history_service)]
+    
