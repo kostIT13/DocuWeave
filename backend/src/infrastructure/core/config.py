@@ -6,6 +6,7 @@ from pathlib import Path
 class Settings(BaseSettings):
     DATABASE_URL: str
     DEBUG: bool = False
+    ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
     OLLAMA_HOST: str = "http://ollama:11434"
     OLLAMA_EMBEDDING_MODEL: str = "nomic-embed-text"
