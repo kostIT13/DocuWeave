@@ -27,15 +27,18 @@ class DocumentService:
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"DocumentService инициализирован (upload_dir={self.upload_dir})")
 
+
     async def get_document_by_id(self, document_id: str, project_id: str) -> Optional[Document]:
         document = await self.repository.get_by_id(document_id)
         if not document or document.project_id != project_id or document.is_deleted:
             return None
         return document
     
+
     async def get_list_documents(self, project_id: str, limit: int = 20) -> List[Document]:
         limit = max(1, min(limit, 100))
         return await self.repository.get_project_documents(project_id)
+
 
     async def upload_document(
         self,
