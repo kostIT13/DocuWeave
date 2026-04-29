@@ -7,6 +7,7 @@ from langchain_community.document_loaders import (
 from typing import List, Dict, Any
 from pathlib import Path
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,16 +20,11 @@ class DocumentProcessor:
         )
 
     async def load_and_split(self, file_path: str, mime_type: str) -> List[Dict[str, Any]]:
-        """
-        Асинхронно загружает документ и разбивает на чанки.
-        """
         try:
             loader = self._get_loader(file_path, mime_type)
-            # Загрузка документа в отдельном потоке, чтобы не блокировать event loop
             docs = await asyncio.to_thread(loader.load)
             logger.info(f"Загружен документ {file_path}, количество страниц/секций: {len(docs)}")
             
-            # Разбиение на чанки
             chunks = self.splitter.split_documents(docs)
             logger.info(f"Документ разбит на {len(chunks)} чанков")
             
@@ -49,24 +45,18 @@ class DocumentProcessor:
             raise
 
     def _get_loader(self, path: str, mime: str):
-        """
-        Возвращает соответствующий загрузчик для MIME-типа.
-        """
         loaders = {
             "application/pdf": PyPDFLoader,
             "text/plain": TextLoader,
             "text/markdown": UnstructuredMarkdownLoader,
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document": Docx2txtLoader,
-            "application/msword": TextLoader,  # fallback для .doc
+            "application/msword": TextLoader,
         }
         loader_cls = loaders.get(mime, TextLoader)
         logger.debug(f"Используется загрузчик {loader_cls.__name__} для файла {path}")
         return loader_cls(path)
 
     def update_splitter_params(self, chunk_size: int, chunk_overlap: int):
-        """
-        Обновляет параметры сплиттера.
-        """
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,

@@ -31,7 +31,6 @@ class ChromaClient:
         self.client = client or _create_chroma_client()
     
     def get_or_create_collection(self, name: str, **kwargs):
-        """Получить или создать коллекцию с указанным именем."""
         return self.client.get_or_create_collection(
             name=name,
             metadata={"hnsw:space": "cosine"}
@@ -45,13 +44,8 @@ class ChromaClient:
         metadatas: List[Dict],
         documents: Optional[List[str]] = None
     ):
-        """
-        Добавить документы в указанную коллекцию.
-        Если documents не переданы, используются пустые строки (только эмбеддинги).
-        """
         try:
             collection = self.get_or_create_collection(collection_name)
-            # Если documents не переданы, создаём список пустых строк
             if documents is None:
                 documents = [""] * len(ids)
             collection.add(
@@ -65,6 +59,7 @@ class ChromaClient:
             logger.error(f"Ошибка добавления документов в коллекцию '{collection_name}': {e}")
             raise
     
+
     async def query(
         self, 
         collection_name: str, 
@@ -72,10 +67,6 @@ class ChromaClient:
         top_k: int = 5,
         where_filter: Optional[Dict] = None
     ) -> Dict[str, Any]:
-        """
-        Выполнить поиск в коллекции по эмбеддингу.
-        Возвращает словарь с keys: 'documents', 'metadatas', 'distances', 'ids'.
-        """
         try:
             collection = self.get_or_create_collection(collection_name)
             results = collection.query(
@@ -83,12 +74,10 @@ class ChromaClient:
                 n_results=top_k,
                 where=where_filter
             )
-            # Chroma возвращает списки списков, преобразуем к плоскому виду для удобства
-            # Например, results['documents'] = [["doc1", "doc2"]] -> ["doc1", "doc2"]
             flattened = {}
             for key in ['documents', 'metadatas', 'distances', 'ids']:
                 if key in results and results[key]:
-                    flattened[key] = results[key][0]  # берём первый (и единственный) запрос
+                    flattened[key] = results[key][0] 
                 else:
                     flattened[key] = []
             return flattened
@@ -96,8 +85,8 @@ class ChromaClient:
             logger.error(f"Ошибка поиска в коллекции '{collection_name}': {e}")
             raise
     
+
     async def delete_documents(self, collection_name: str, ids: List[str]):
-        """Удалить документы по ID из указанной коллекции."""
         try:
             collection = self.get_or_create_collection(collection_name)
             collection.delete(ids=ids)
@@ -107,8 +96,8 @@ class ChromaClient:
             raise
 
 
-# Для обратной совместимости оставим ленивый клиент, но он будет использовать экземпляр без коллекции по умолчанию
 _chroma_client_instance = None
+
 
 def _get_chroma_client_instance():
     global _chroma_client_instance

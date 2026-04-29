@@ -14,9 +14,6 @@ class OllamaClient:
         logger.info(f"OllamaClient инициализирован с базовым URL: {self.base_url}")
 
     async def embed(self, text: str, model: str) -> List[float]:
-        """
-        Получить эмбеддинг текста через Ollama API.
-        """
         async with httpx.AsyncClient(timeout=60.0) as client:
             try:
                 res = await client.post(f"{self.base_url}/api/embeddings", json={
@@ -43,9 +40,6 @@ class OllamaClient:
         temperature: float = 0.3,
         system_prompt: Optional[str] = None
     ) -> str:
-        """
-        Отправить запрос в чат Ollama и получить ответ.
-        """
         payload = {
             "model": model,
             "messages": messages,
@@ -71,6 +65,7 @@ class OllamaClient:
                 logger.error(f"Некорректный ответ от Ollama: {data}")
                 raise
 
+
     async def chat_stream(
         self,
         messages: List[Dict[str, str]],
@@ -78,9 +73,6 @@ class OllamaClient:
         temperature: float = 0.3,
         system_prompt: Optional[str] = None
     ) -> AsyncGenerator[str, None]:
-        """
-        Стриминговая версия чата, возвращает токены по мере поступления.
-        """
         payload = {
             "model": model,
             "messages": messages,
@@ -98,7 +90,6 @@ class OllamaClient:
                         line = line.strip()
                         if not line:
                             continue
-                        # Формат SSE: data: {...}
                         if line.startswith("data: "):
                             json_str = line[6:]
                             if json_str == "[DONE]":
