@@ -16,6 +16,7 @@ from src.api.chat.schemas import ChatHistoryResponse, ChatSessionCreate, ChatSes
 from src.api.chat.dependencies import ChatSessionServiceDependency
 from src.api.auth.dependencies import CurrentUserDependency
 
+
 router = APIRouter(prefix="/chat-sessions", tags=["Chat Sessions"])
 
 
