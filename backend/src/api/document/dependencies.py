@@ -29,4 +29,5 @@ async def get_document_or_404(
     
     return document
 
+
 DocumentDependency = Annotated[Document, Depends(get_document_or_404)]

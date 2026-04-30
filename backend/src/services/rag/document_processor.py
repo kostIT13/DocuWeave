@@ -1,9 +1,7 @@
 import asyncio
 import logging
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import (
-    PyPDFLoader, TextLoader, Docx2txtLoader, UnstructuredMarkdownLoader
-)
+from langchain_community.document_loaders import PyPDFLoader, TextLoader, Docx2txtLoader, UnstructuredMarkdownLoader
 from typing import List, Dict, Any
 from pathlib import Path
 

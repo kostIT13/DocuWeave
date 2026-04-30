@@ -1,4 +1,3 @@
-import os
 import chromadb
 from chromadb.config import Settings
 from src.infrastructure.core.config import settings

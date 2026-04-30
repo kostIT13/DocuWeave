@@ -1,17 +1,7 @@
-# src/api/project/routes.py
 from fastapi import APIRouter, Depends, status, HTTPException, Query
 from typing import List
-
-from src.api.project.schemas import (
-    ProjectCreate, ProjectResponse, ProjectUpdate, 
-    ProjectSettings, ProjectSettingsUpdate, 
-    HistoryPagination, SettingsHistoryResponse
-)
-from src.api.project.dependencies import (
-    ProjectServiceDependency, 
-    CurrentProjectDependency, 
-    SettingsHistoryServiceDependency
-)
+from src.api.project.schemas import ProjectCreate, ProjectResponse, ProjectUpdate, ProjectSettings, ProjectSettingsUpdate, HistoryPagination, SettingsHistoryResponse
+from src.api.project.dependencies import ProjectServiceDependency, CurrentProjectDependency, SettingsHistoryServiceDependency
 from src.api.auth.dependencies import CurrentUserDependency
 
 

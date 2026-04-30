@@ -33,6 +33,7 @@ async def create_session(
         title=data.title
     )
 
+
 @router.get("", response_model=List[ChatSessionResponse])
 async def list_sessions(
     service: ChatSessionServiceDependency,

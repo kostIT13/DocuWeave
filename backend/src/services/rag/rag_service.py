@@ -1,6 +1,4 @@
-import uuid
-import hashlib
-from typing import List, Dict, Any, Optional, AsyncGenerator
+from typing import List, Dict, Any, AsyncGenerator
 import logging
 from src.services.rag.ollama_client import OllamaClient
 from src.services.rag.chroma_client import ChromaClient
