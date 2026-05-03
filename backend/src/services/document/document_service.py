@@ -9,7 +9,7 @@ import os
 from src.infrastructure.models.document import DocumentStatus
 import hashlib
 import uuid
-from src.services.rag.rag_service import RAGService
+from src.services.rag import create_rag_orchestrator
 from fastapi import BackgroundTasks
 from src.infrastructure.core.database import engine as async_engine
 from sqlalchemy import select 
@@ -119,11 +119,27 @@ class DocumentService:
                 logger.error(f"Ошибка удаления файла {doc.file_path}: {e}")
         
         try:
-            rag = RAGService()
-            collection = f"proj_{project_id}"
-            logger.info(f"[RAG] Удаление из индекса: {collection}, doc_id={doc.id} (заглушка)")
+            rag_orchestrator = create_rag_orchestrator()
+            from sqlalchemy import select
+            from src.infrastructure.models.project import Project
+            stmt = select(Project).where(Project.id == project_id)
+            result = await self.db.execute(stmt)
+            project = result.scalar_one_or_none()
+            settings = project.settings if project else {}
+            
+            delete_result = await rag_orchestrator.indexer.delete_document(
+                doc_id=doc.id,
+                project_settings=settings,
+                user_id=project_id
+            )
+            
+            if delete_result.get("success"):
+                logger.info(f"[RAG] Документ {doc.id} удалён из индекса: {delete_result.get('message')}")
+            else:
+                logger.warning(f"[RAG] Не удалось удалить документ из индекса: {delete_result.get('error')}")
+                
         except Exception as e:
-            logger.error(f"Ошибка удаления из индекса: {e}")
+            logger.error(f"Ошибка удаления из RAG индекса: {e}")
         
         if hard:
             result = await self.repository.hard_delete(document_id)
@@ -154,13 +170,13 @@ class DocumentService:
 
 
     async def _index_document_safe(self, document_id: str):
-        rag = RAGService()
+        rag_orchestrator = create_rag_orchestrator()
         
         async with AsyncSession(async_engine) as bg_session:
             bg_repo = SQLAlchemyDocumentRepository(bg_session)
             
             try:
-                logger.info(f"[INDEX] Начинаю индексацию (id={document_id})")
+                logger.info(f"[INDEX] Начинаю индексацию (id={document_id}) с новой архитектурой")
                 
                 doc = await bg_repo.get_by_id(document_id)
                 if not doc:
@@ -176,12 +192,12 @@ class DocumentService:
                 project = proj_res.scalar_one_or_none()
                 settings = project.settings if project else {}
                 
-                result = await rag.index_document(
+                result = await rag_orchestrator.index_document(
                     doc_id=doc.id,
                     file_path=doc.file_path,
                     mime_type=doc.mime_type,
-                    project_settings=settings,      
-                    user_id=doc.project_id          
+                    project_settings=settings,
+                    user_id=doc.project_id
                 )
                 
                 if result.get("success"):
