@@ -23,11 +23,6 @@ class UserLogin(BaseModel):
     password: str = Field(..., examples=["Str0ngP@ss!"], json_schema_extra={"writeOnly": True})
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,3 +32,12 @@ class UserResponse(BaseModel):
     created_at: datetime
     
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenWithUser(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserResponse
