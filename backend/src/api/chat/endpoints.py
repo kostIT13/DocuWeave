@@ -6,7 +6,7 @@ from src.api.chat.dependencies import ChatDependency, MessageServiceDependency
 from src.api.chat.schemas import MessageCreate, MessageResponse
 from src.api.project.dependencies import CurrentProjectDependency
 from src.services.message.message_service import MessageService
-from src.services.rag.rag_service import RAGService
+from src.services.rag import create_rag_orchestrator
 from src.infrastructure.core.database import get_db
 from src.infrastructure.models.project import Project
 from src.infrastructure.models.message import MessageRole
@@ -121,15 +121,15 @@ async def send_message(
         for msg in history_msgs
     ]
     
-    rag = RAGService()
+    rag_orchestrator = create_rag_orchestrator()
     
-    context = await rag.retrieve(
+    context = await rag_orchestrator.retrieve(
         query=data.content,
         project_settings=settings,
         project_id=chat.project_id
     )
     
-    answer = await rag.generate_response(
+    answer = await rag_orchestrator.generate_response(
         query=data.content,
         context=context,
         history=history,
@@ -182,9 +182,9 @@ async def stream_message(
                 for msg in history_msgs
             ]
             
-            rag = RAGService()
+            rag_orchestrator = create_rag_orchestrator()
             
-            context = await rag.retrieve(query, settings, chat.project_id)
+            context = await rag_orchestrator.retrieve(query, settings, chat.project_id)
             
             sources_meta = [
                 {"file": c["metadata"].get("file_path"), "chunk": c["metadata"].get("chunk_index")}
@@ -193,7 +193,7 @@ async def stream_message(
             yield f"data: {json.dumps({'type': 'sources', 'data': sources_meta})}\n\n"
             
             full_response = ""
-            async for token in rag.generate_response_stream(query, context, history, settings):
+            async for token in rag_orchestrator.generate_response_stream(query, context, history, settings):
                 full_response += token
                 yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
             
