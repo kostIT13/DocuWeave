@@ -20,22 +20,22 @@ services:
     working_dir: /app
 
   backend:
-    build: ./backend                         
+    build: ./backend
     container_name: my_backend
     working_dir: /app
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     volumes:
-      - ./backend/src:/app/src:ro             
-      - ./uploads:/app/uploads                
+      - ./backend/src:/app/src:ro
+      - ./uploads:/app/uploads
     environment:
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
-      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_HOST=http://ollama:11434
       - OLLAMA_EMBEDDING_MODEL=nomic-embed-text
-      - OLLAMA_LLM_MODEL=llama3.2:3b
+      - OLLAMA_LLM_MODEL=qwen2.5:7b
     env_file:
       - .env
     depends_on:
@@ -43,11 +43,11 @@ services:
         condition: service_healthy
       chromadb:
         condition: service_started
+      ollama:
+        condition: service_started
     networks:
       - app_network
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal=host-gateway"
       
   db:
     image: postgres:15-alpine
@@ -73,9 +73,9 @@ services:
     image: chromadb/chroma:latest
     container_name: my_chroma
     ports:
-      - "8001:8000"  
+      - "8001:8000"
     volumes:
-      - chroma_data:/chroma/chroma 
+      - chroma_data:/chroma/chroma
     networks:
       - app_network
     restart: unless-stopped
@@ -85,6 +85,32 @@ services:
       timeout: 5s
       retries: 5
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: my_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./backend/scripts:/scripts:ro
+    networks:
+      - app_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # Увеличиваем лимиты памяти для работы с большими моделями
+    deploy:
+      resources:
+        limits:
+          memory: 16G
+        reservations:
+          memory: 8G
+    # Запуск скрипта инициализации перед основным сервером
+    entrypoint: ["/bin/sh", "-c", "/scripts/init-ollama.sh && exec ollama serve"]
+
 networks:
   app_network:
     driver: bridge
@@ -92,3 +118,4 @@ networks:
 volumes:
   postgres_data:
   chroma_data:
+  ollama_data:
