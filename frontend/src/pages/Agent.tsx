@@ -61,7 +61,6 @@ const Agent = () => {
     const userMessage = inputText.trim();
     setInputText('');
     
-    // Добавляем сообщение пользователя в историю
     const userMessageObj = {
       role: 'user' as const,
       content: userMessage,
@@ -74,7 +73,7 @@ const Agent = () => {
     try {
       const request: AgentQueryRequest = {
         input_text: userMessage,
-        project_id: '1', // В реальном приложении это будет выбранный проект
+        project_id: '1', 
         use_rag: useRag,
         use_tools: useTools,
         conversation_history: conversationHistory.map(msg => ({
@@ -88,7 +87,6 @@ const Agent = () => {
       if (response.success && response.data) {
         setAgentResponse(response.data);
         
-        // Добавляем ответ агента в историю
         const assistantMessageObj = {
           role: 'assistant' as const,
           content: response.data.response,
@@ -102,7 +100,6 @@ const Agent = () => {
     } catch (error) {
       console.error('Failed to send message:', error);
       
-      // Добавляем сообщение об ошибке
       const errorMessageObj = {
         role: 'assistant' as const,
         content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -135,7 +132,6 @@ const Agent = () => {
       const response = await agentService.analyzeDocument(request);
       
       if (response.success && response.data) {
-        // Добавляем результат анализа в историю
         const analysisMessage = {
           role: 'assistant' as const,
           content: `Document analysis (${analysisType}):\n\n${response.data.analysis}`,
@@ -220,9 +216,7 @@ const Agent = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left panel - Controls and info */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Agent info card */}
           <div className="bg-white rounded-lg border border-gray-200 p-5">
             <div className="flex items-center mb-4">
               <div className="bg-blue-100 p-2 rounded-lg">
@@ -253,7 +247,6 @@ const Agent = () => {
             </div>
           </div>
 
-          {/* Settings card */}
           <div className="bg-white rounded-lg border border-gray-200 p-5">
             <h3 className="font-semibold text-gray-900 mb-4">Agent Settings</h3>
             
@@ -292,7 +285,6 @@ const Agent = () => {
             </div>
           </div>
 
-          {/* Document analysis card */}
           <div className="bg-white rounded-lg border border-gray-200 p-5">
             <h3 className="font-semibold text-gray-900 mb-4">Document Analysis</h3>
             
@@ -347,11 +339,8 @@ const Agent = () => {
           </div>
         </div>
 
-        {/* Main chat area */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Chat container */}
           <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-[500px]">
-            {/* Chat header */}
             <div className="px-5 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -372,7 +361,6 @@ const Agent = () => {
               </div>
             </div>
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-5">
               {conversationHistory.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
@@ -433,7 +421,6 @@ const Agent = () => {
               )}
             </div>
 
-            {/* Input area */}
             <div className="border-t border-gray-200 p-4">
               <div className="flex space-x-3">
                 <div className="flex-1">
@@ -462,7 +449,6 @@ const Agent = () => {
             </div>
           </div>
 
-          {/* Agent response details */}
           {agentResponse && (
             <div className="bg-white rounded-lg border border-gray-200 p-5">
               <h3 className="font-semibold text-gray-900 mb-4">Response Details</h3>
@@ -501,7 +487,6 @@ const Agent = () => {
                 </div>
               </div>
 
-              {/* Tools used */}
               {agentResponse.tools_used.length > 0 && (
                 <div className="mb-4">
                   <p className="text-sm font-medium text-gray-700 mb-2">Tools Used</p>
@@ -519,7 +504,6 @@ const Agent = () => {
                 </div>
               )}
 
-              {/* Context documents */}
               {agentResponse.context && agentResponse.context.length > 0 && (
                 <div>
                   <p className="text-sm font-medium text-gray-700 mb-2">Relevant Documents</p>

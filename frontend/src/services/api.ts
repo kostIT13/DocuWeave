@@ -1,19 +1,11 @@
-/**
- * Базовый сервис для работы с API
- */
-
 import type { ApiResponse } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-// Интерфейс для конфигурации запроса
 interface RequestConfig extends RequestInit {
   headers?: Record<string, string>;
 }
 
-/**
- * Базовый HTTP клиент
- */
 class ApiClient {
   private baseUrl: string;
   private defaultHeaders: Record<string, string>;
@@ -26,23 +18,14 @@ class ApiClient {
     };
   }
 
-  /**
-   * Установка токена аутентификации
-   */
   setAuthToken(token: string): void {
     this.defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
 
-  /**
-   * Очистка токена аутентификации
-   */
   clearAuthToken(): void {
     delete this.defaultHeaders['Authorization'];
   }
 
-  /**
-   * Базовый метод для выполнения HTTP запросов
-   */
   async request<T = any>(
     endpoint: string,
     config: RequestConfig = {}
@@ -85,16 +68,10 @@ class ApiClient {
     }
   }
 
-  /**
-   * GET запрос
-   */
   async get<T = any>(endpoint: string, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'GET' });
   }
 
-  /**
-   * POST запрос
-   */
   async post<T = any>(endpoint: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
@@ -103,9 +80,6 @@ class ApiClient {
     });
   }
 
-  /**
-   * PUT запрос
-   */
   async put<T = any>(endpoint: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
@@ -114,9 +88,6 @@ class ApiClient {
     });
   }
 
-  /**
-   * PATCH запрос
-   */
   async patch<T = any>(endpoint: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
@@ -125,16 +96,10 @@ class ApiClient {
     });
   }
 
-  /**
-   * DELETE запрос
-   */
   async delete<T = any>(endpoint: string, config?: RequestConfig): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, { ...config, method: 'DELETE' });
   }
 
-  /**
-   * Загрузка файла
-   */
   async uploadFile(
     endpoint: string,
     file: File,
@@ -185,9 +150,6 @@ class ApiClient {
     }
   }
 
-  /**
-   * Потоковое получение данных (SSE)
-   */
   async stream<T = any>(
     endpoint: string,
     onData: (data: T) => void,
@@ -220,12 +182,8 @@ class ApiClient {
   }
 }
 
-// Экспорт синглтона API клиента
 export const api = new ApiClient();
 
-/**
- * Сервисы для конкретных доменов
- */
 export const authService = {
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }),
@@ -304,9 +262,6 @@ export const agentService = {
   getHealth: () => api.get('/agent/health'),
 };
 
-/**
- * Хелпер для обработки ошибок
- */
 export const handleApiError = (error: any): string => {
   if (typeof error === 'string') return error;
   if (error?.message) return error.message;

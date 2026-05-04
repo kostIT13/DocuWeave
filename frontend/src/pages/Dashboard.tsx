@@ -30,8 +30,6 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // В реальном приложении здесь был бы отдельный эндпоинт для дашборда
-        // Сейчас симулируем данные
         setStats({
           totalDocuments: 42,
           indexedDocuments: 38,
@@ -207,13 +205,11 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-gray-600">Welcome back! Here's what's happening with your documents.</p>
       </div>
 
-      {/* Stats grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
@@ -244,7 +240,6 @@ const Dashboard = () => {
         })}
       </div>
 
-      {/* Quick actions */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -267,9 +262,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent activity */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Recent documents */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="px-5 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Recent Documents</h2>
@@ -311,7 +304,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Recent chats */}
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="px-5 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Recent Chats</h2>
@@ -355,7 +347,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* System status */}
       <div className="bg-white rounded-lg border border-gray-200 p-5">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">System Status</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

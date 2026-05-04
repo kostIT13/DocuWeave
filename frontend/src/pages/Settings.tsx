@@ -4,25 +4,19 @@ import { Settings as SettingsIcon, User, Bell, Shield, Database, Globe, Save } f
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState({
-    // General
     language: 'en',
     timezone: 'UTC',
     theme: 'light',
     
-    // Account
     email: 'user@example.com',
     name: 'John Doe',
     notifications: true,
     
-    // Security
     twoFactorAuth: false,
     sessionTimeout: 30,
     
-    // API
     apiKey: 'sk_••••••••••••••••••••••••••••••••',
     apiEndpoint: 'http://localhost:8000',
-    
-    // LLM
     llmModel: 'qwen2.5:7b',
     embeddingModel: 'nomic-embed-text',
     temperature: 0.3,
@@ -39,7 +33,6 @@ const Settings = () => {
   ];
 
   const handleSave = () => {
-    // In a real app, this would save to backend
     console.log('Saving settings:', settings);
     alert('Settings saved successfully!');
   };
@@ -225,7 +218,6 @@ const Settings = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-600">Manage your account and application preferences</p>
@@ -256,7 +248,6 @@ const Settings = () => {
             </nav>
           </div>
 
-          {/* Content */}
           <div className="flex-1 p-6">
             {renderContent()}
             

@@ -29,8 +29,6 @@ const Documents = () => {
   const fetchDocuments = async () => {
     setIsLoading(true);
     try {
-      // В реальном приложении здесь был бы вызов API
-      // Сейчас симулируем данные
       setTimeout(() => {
         setDocuments([
           {
@@ -147,9 +145,7 @@ const Documents = () => {
 
   const handleRetryIndexing = async (documentId: string) => {
     try {
-      // В реальном приложении здесь был бы вызов API
       console.log('Retrying indexing for document:', documentId);
-      // Обновляем статус документа
       setDocuments(docs =>
         docs.map(doc =>
           doc.id === documentId ? { ...doc, status: 'processing' } : doc
@@ -166,7 +162,6 @@ const Documents = () => {
     }
 
     try {
-      // В реальном приложении здесь был бы вызов API
       console.log('Deleting document:', documentId);
       setDocuments(docs => docs.filter(doc => doc.id !== documentId));
     } catch (error) {
@@ -181,7 +176,6 @@ const Documents = () => {
       return;
     }
 
-    // В реальном приложении здесь был бы вызов API
     setDocuments(docs => docs.filter(doc => !selectedDocs.includes(doc.id)));
     setSelectedDocs([]);
   };
@@ -215,7 +209,6 @@ const Documents = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
@@ -244,10 +237,8 @@ const Documents = () => {
         </div>
       </div>
 
-      {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -261,7 +252,6 @@ const Documents = () => {
             </div>
           </div>
 
-          {/* Status filter */}
           <div className="flex items-center space-x-2">
             <Filter className="w-5 h-5 text-gray-400" />
             <select
@@ -277,7 +267,6 @@ const Documents = () => {
             </select>
           </div>
 
-          {/* Refresh button */}
           <button
             onClick={fetchDocuments}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center"
@@ -288,7 +277,6 @@ const Documents = () => {
         </div>
       </div>
 
-      {/* Documents table */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -399,7 +387,6 @@ const Documents = () => {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
@@ -453,7 +440,6 @@ const Documents = () => {
         </div>
       </div>
 
-      {/* Upload Modal (simplified) */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -476,7 +462,6 @@ const Documents = () => {
               </button>
               <button
                 onClick={() => {
-                  // В реальном приложении здесь была бы загрузка файла
                   setShowUploadModal(false);
                   fetchDocuments();
                 }}

@@ -43,14 +43,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Sidebar for desktop */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -66,7 +64,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </button>
           </div>
 
-          {/* Project selector */}
           <div className="px-4 py-3 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -84,7 +81,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </select>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -106,7 +102,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             })}
           </nav>
 
-          {/* Quick actions */}
           <div className="px-4 py-4 border-t border-gray-200">
             <Link
               to="/upload"
@@ -117,7 +112,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </Link>
           </div>
 
-          {/* User menu */}
           <div className="px-4 py-4 border-t border-gray-200">
             <div className="relative">
               <button
@@ -159,9 +153,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="lg:pl-64">
-        {/* Mobile header */}
         <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200 lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -178,13 +170,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div className="w-10"></div>
         </header>
 
-        {/* Page content */}
         <main className="min-h-[calc(100vh-4rem)] p-4 lg:p-6">
           {children}
         </main>
       </div>
 
-      {/* Overlay for mobile sidebar */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"

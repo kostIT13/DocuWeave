@@ -22,7 +22,6 @@ const Chat = () => {
     setMessages([...messages, newMessage]);
     setInput('');
     
-    // Simulate AI response
     setTimeout(() => {
       const aiResponse = {
         id: messages.length + 2,
@@ -43,7 +42,6 @@ const Chat = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Chat</h1>
@@ -60,7 +58,6 @@ const Chat = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Chat list */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg border border-gray-200">
             <div className="px-5 py-4 border-b border-gray-200">
@@ -85,10 +82,8 @@ const Chat = () => {
           </div>
         </div>
 
-        {/* Main chat area */}
         <div className="lg:col-span-3">
           <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-[600px]">
-            {/* Chat header */}
             <div className="px-5 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
@@ -105,7 +100,6 @@ const Chat = () => {
               </div>
             </div>
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-5">
               <div className="space-y-6">
                 {messages.map((message) => (
@@ -138,7 +132,6 @@ const Chat = () => {
               </div>
             </div>
 
-            {/* Input area */}
             <div className="border-t border-gray-200 p-4">
               <div className="flex space-x-3">
                 <div className="flex-1">

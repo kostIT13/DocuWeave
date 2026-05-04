@@ -1,8 +1,3 @@
-/**
- * Основные типы для DocuWeave frontend
- */
-
-// Пользователь
 export interface User {
   id: string;
   email: string;
@@ -10,7 +5,6 @@ export interface User {
   created_at: string;
 }
 
-// Проект
 export interface Project {
   id: string;
   name: string;
@@ -20,7 +14,6 @@ export interface Project {
   updated_at: string;
 }
 
-// Настройки проекта
 export interface ProjectSettings {
   llm_model: string;
   embedding_model: string;
@@ -31,7 +24,6 @@ export interface ProjectSettings {
   [key: string]: any;
 }
 
-// Документ
 export interface Document {
   id: string;
   project_id: string;
@@ -44,7 +36,6 @@ export interface Document {
   updated_at: string;
 }
 
-// Сессия чата
 export interface ChatSession {
   id: string;
   project_id: string;
@@ -54,7 +45,6 @@ export interface ChatSession {
   message_count: number;
 }
 
-// Сообщение
 export interface Message {
   id: string;
   chat_id: string;
@@ -69,7 +59,6 @@ export interface Message {
   created_at: string;
 }
 
-// Ответ агента
 export interface AgentResponse {
   success: boolean;
   response: string;
@@ -87,7 +76,6 @@ export interface AgentResponse {
   metadata: Record<string, any>;
 }
 
-// Запрос к агенту
 export interface AgentQueryRequest {
   input_text: string;
   project_id: string;
@@ -99,7 +87,6 @@ export interface AgentQueryRequest {
   }>;
 }
 
-// Анализ документа
 export interface DocumentAnalysisRequest {
   document_content: string;
   analysis_type: 'summary' | 'key_points' | 'sentiment' | 'structure';
@@ -116,7 +103,6 @@ export interface DocumentAnalysisResponse {
   error?: string;
 }
 
-// API ответы
 export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
@@ -124,13 +110,11 @@ export interface ApiResponse<T = any> {
   success: boolean;
 }
 
-// Состояние загрузки
 export interface LoadingState {
   isLoading: boolean;
   error?: string;
 }
 
-// Пагинация
 export interface Pagination<T> {
   items: T[];
   total: number;
@@ -139,7 +123,6 @@ export interface Pagination<T> {
   total_pages: number;
 }
 
-// Фильтры
 export interface DocumentFilters {
   status?: Document['status'];
   search?: string;

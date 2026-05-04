@@ -19,7 +19,6 @@ export const useAuth = (): UseAuthReturn => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Проверка аутентификации при загрузке
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('auth_token');
@@ -141,7 +140,6 @@ export const useAuth = (): UseAuthReturn => {
   };
 };
 
-// Хук для защиты маршрутов
 export const useRequireAuth = (redirectTo: string = '/login') => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();

@@ -53,7 +53,6 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white">
           <div className="flex items-center justify-center mb-4">
             <div className="bg-white/20 p-3 rounded-full">
@@ -71,7 +70,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Form */}
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
@@ -233,7 +231,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="bg-gray-50 px-8 py-4 text-center">
           <p className="text-gray-600 text-sm">
             Нажимая кнопку, вы соглашаетесь с{' '}

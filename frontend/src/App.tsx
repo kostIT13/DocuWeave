@@ -11,17 +11,15 @@ import Login from './pages/Login';
 import { useAuth } from './hooks/useAuth';
 import './App.css';
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000, 
       retry: 1,
     },
   },
 });
 
-// Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
@@ -43,7 +41,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Public route wrapper (redirects if already logged in)
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
@@ -65,7 +62,6 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Main App component
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -96,7 +92,6 @@ function App() {
             }}
           />
           <Routes>
-            {/* Public routes */}
             <Route
               path="/login"
               element={
@@ -106,7 +101,6 @@ function App() {
               }
             />
 
-            {/* Protected routes with MainLayout */}
             <Route
               path="/"
               element={
@@ -158,7 +152,6 @@ function App() {
               }
             />
 
-            {/* Catch all route */}
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
