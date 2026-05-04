@@ -119,14 +119,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    # Увеличиваем лимиты памяти для работы с большими моделями
     deploy:
       resources:
         limits:
           memory: 16G
         reservations:
           memory: 8G
-    # Запуск скрипта инициализации перед основным сервером
     entrypoint: ["/bin/sh", "-c", "/scripts/init-ollama.sh && exec ollama serve"]
 
 networks:
