@@ -61,6 +61,34 @@
    docker-compose run migrations
    ```
 
+6. **Работа с миграциями базы данных**
+   
+   При изменении моделей SQLAlchemy необходимо создавать новые миграции:
+   
+   **Создание миграции:**
+   ```bash
+   # Используя скрипт (Windows)
+   backend\scripts\make-migration.bat "описание изменений"
+   
+   # Или напрямую через Docker
+   docker-compose run --rm migrations alembic revision --autogenerate -m "описание изменений"
+   ```
+   
+   **Применение миграций:**
+   ```bash
+   docker-compose up migrations
+   ```
+   
+   **Откат последней миграции:**
+   ```bash
+   docker-compose run --rm migrations alembic downgrade -1
+   ```
+   
+   **Просмотр истории миграций:**
+   ```bash
+   docker-compose run --rm migrations alembic history
+   ```
+
 ## Сервисы Docker Compose
 
 ### 1. Backend (FastAPI)
