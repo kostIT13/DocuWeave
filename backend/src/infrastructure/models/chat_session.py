@@ -24,8 +24,8 @@ class ChatSession(Base):
 
     user: Mapped["User"] = relationship("User", back_populates='sessions')
     project: Mapped["Project"] = relationship("Project", back_populates='sessions')
-    messages: Mapped[List["Message"]] = relationship("Message", back_populates='session', cascade='all, delete-orphan', lazy="selectin")
-    traces: Mapped[List["GraphTrace"]] = relationship("GraphTrace", back_populates='session', cascade='all, delete-orphan', lazy='selectin')
+    messages: Mapped[List["Message"]] = relationship("Message", back_populates='chat_session', cascade='all, delete-orphan', lazy="selectin")
+    traces: Mapped[List["GraphTrace"]] = relationship("GraphTrace", back_populates='chat_session', cascade='all, delete-orphan', lazy='selectin')
 
 
 
