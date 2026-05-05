@@ -112,7 +112,7 @@ const Dashboard = () => {
       title: 'Total Documents',
       value: stats.totalDocuments,
       icon: FileText,
-      color: 'bg-blue-500',
+      color: 'bg-primary-500',
       change: '+12%',
       link: '/documents',
     },
@@ -148,28 +148,28 @@ const Dashboard = () => {
       description: 'Add new documents for analysis',
       icon: Upload,
       link: '/upload',
-      color: 'bg-blue-100 text-blue-700',
+      color: 'bg-primary-50 text-primary-700',
     },
     {
       title: 'Start New Chat',
       description: 'Ask questions about your documents',
       icon: MessageSquare,
       link: '/chat/new',
-      color: 'bg-purple-100 text-purple-700',
+      color: 'bg-purple-50 text-purple-700',
     },
     {
       title: 'Use Agent',
       description: 'Advanced analysis with AI agent',
       icon: Bot,
       link: '/agent',
-      color: 'bg-green-100 text-green-700',
+      color: 'bg-green-50 text-green-700',
     },
     {
       title: 'View Analytics',
       description: 'Usage statistics and insights',
       icon: BarChart3,
       link: '/analytics',
-      color: 'bg-orange-100 text-orange-700',
+      color: 'bg-orange-50 text-orange-700',
     },
   ];
 
@@ -210,27 +210,30 @@ const Dashboard = () => {
         <p className="text-gray-600">Welcome back! Here's what's happening with your documents.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.title} className="bg-white rounded-lg border border-gray-200 p-5">
+            <div
+              key={stat.title}
+              className="bg-white rounded-2xl border border-gray-100 p-6 shadow-soft hover:shadow-medium transition-shadow duration-300 animate-fade-in"
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                  <p className="text-sm font-medium text-secondary-600">{stat.title}</p>
                   <p className="mt-2 text-3xl font-bold text-gray-900">{stat.value}</p>
                   <p className="mt-1 text-sm text-green-600 flex items-center">
                     <ArrowUpRight className="w-4 h-4 mr-1" />
                     {stat.change} from last month
                   </p>
                 </div>
-                <div className={`${stat.color} p-3 rounded-lg`}>
+                <div className={`${stat.color} p-3 rounded-xl`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
               </div>
               <Link
                 to={stat.link}
-                className="mt-4 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+                className="mt-4 inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors"
               >
                 View details
                 <ArrowUpRight className="w-4 h-4 ml-1" />
@@ -241,21 +244,21 @@ const Dashboard = () => {
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h2>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <Link
                 key={action.title}
                 to={action.link}
-                className="bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-300 hover:shadow-sm transition-all"
+                className="group bg-white rounded-2xl border border-gray-100 p-6 hover:border-primary-300 hover:shadow-medium transition-all duration-300 animate-slide-up"
               >
-                <div className={`${action.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
-                  <Icon className="w-6 h-6" />
+                <div className={`${action.color} w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:scale-105 transition-transform`}>
+                  <Icon className="w-7 h-7" />
                 </div>
-                <h3 className="font-medium text-gray-900">{action.title}</h3>
-                <p className="mt-1 text-sm text-gray-600">{action.description}</p>
+                <h3 className="font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{action.title}</h3>
+                <p className="mt-2 text-sm text-secondary-600">{action.description}</p>
               </Link>
             );
           })}
@@ -263,24 +266,24 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-5 py-4 border-b border-gray-200">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-soft overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-100 bg-gray-50">
             <h2 className="text-lg font-semibold text-gray-900">Recent Documents</h2>
-            <p className="text-sm text-gray-600">Latest uploaded documents</p>
+            <p className="text-sm text-secondary-600">Latest uploaded documents</p>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-100">
             {recentDocuments.map((doc) => (
-              <div key={doc.id} className="px-5 py-4 hover:bg-gray-50">
+              <div key={doc.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <FileText className="w-5 h-5 text-gray-400 mr-3" />
+                    <FileText className="w-5 h-5 text-secondary-400 mr-3" />
                     <div>
                       <p className="font-medium text-gray-900">{doc.filename}</p>
                       <div className="flex items-center mt-1 space-x-3">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-secondary-500">
                           {new Date(doc.created_at).toLocaleDateString()}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-secondary-500">
                           {(doc.file_size / 1024 / 1024).toFixed(2)} MB
                         </span>
                       </div>
@@ -294,81 +297,83 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
-          <div className="px-5 py-3 border-t border-gray-200">
+          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
             <Link
               to="/documents"
-              className="text-sm font-medium text-blue-600 hover:text-blue-800"
+              className="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors inline-flex items-center"
             >
-              View all documents →
+              View all documents
+              <ArrowUpRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="px-5 py-4 border-b border-gray-200">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-soft overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-100 bg-gray-50">
             <h2 className="text-lg font-semibold text-gray-900">Recent Chats</h2>
-            <p className="text-sm text-gray-600">Latest conversations</p>
+            <p className="text-sm text-secondary-600">Latest conversations</p>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-100">
             {recentChats.map((chat) => (
               <Link
                 key={chat.id}
                 to={`/chat/${chat.id}`}
-                className="block px-5 py-4 hover:bg-gray-50"
+                className="block px-6 py-4 hover:bg-gray-50 transition-colors group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <MessageSquare className="w-5 h-5 text-gray-400 mr-3" />
+                    <MessageSquare className="w-5 h-5 text-secondary-400 mr-3" />
                     <div>
-                      <p className="font-medium text-gray-900">{chat.title}</p>
+                      <p className="font-medium text-gray-900 group-hover:text-primary-700 transition-colors">{chat.title}</p>
                       <div className="flex items-center mt-1 space-x-3">
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-secondary-500">
                           {new Date(chat.created_at).toLocaleDateString()}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-secondary-500">
                           {chat.message_count} messages
                         </span>
                       </div>
                     </div>
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-gray-400" />
+                  <ArrowUpRight className="w-4 h-4 text-secondary-400 group-hover:text-primary-600 transition-colors" />
                 </div>
               </Link>
             ))}
           </div>
-          <div className="px-5 py-3 border-t border-gray-200">
+          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
             <Link
               to="/chat"
-              className="text-sm font-medium text-blue-600 hover:text-blue-800"
+              className="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors inline-flex items-center"
             >
-              View all chats →
+              View all chats
+              <ArrowUpRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-5">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">System Status</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-soft">
+        <h2 className="text-lg font-semibold text-gray-900 mb-6">System Status</h2>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="flex items-center p-4 bg-gray-50 rounded-xl">
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-4 animate-pulse"></div>
             <div>
               <p className="font-medium text-gray-900">API Server</p>
-              <p className="text-sm text-gray-600">Operational</p>
+              <p className="text-sm text-secondary-600">Operational</p>
             </div>
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+          <div className="flex items-center p-4 bg-gray-50 rounded-xl">
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-4 animate-pulse"></div>
             <div>
               <p className="font-medium text-gray-900">Ollama LLM</p>
-              <p className="text-sm text-gray-600">Connected</p>
+              <p className="text-sm text-secondary-600">Connected</p>
             </div>
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+          <div className="flex items-center p-4 bg-gray-50 rounded-xl">
+            <div className="w-3 h-3 bg-green-500 rounded-full mr-4 animate-pulse"></div>
             <div>
               <p className="font-medium text-gray-900">ChromaDB</p>
-              <p className="text-sm text-gray-600">Online</p>
+              <p className="text-sm text-secondary-600">Online</p>
             </div>
           </div>
         </div>

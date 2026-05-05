@@ -36,14 +36,21 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        await login(formData.email, formData.password);
-        toast.success('Вход выполнен успешно!');
-        navigate('/dashboard');
+        const success = await login(formData.email, formData.password);
+        if (success) {
+          toast.success('Вход выполнен успешно!');
+          navigate('/dashboard');
+        } else {
+          toast.error('Неверный email или пароль');
+        }
       } else {
-        await register(formData.name, formData.email, formData.password);
-        toast.success('Регистрация прошла успешно!');
-        setIsLogin(true);
-        setFormData(prev => ({ ...prev, password: '' }));
+        const success = await register(formData.name, formData.email, formData.password);
+        if (success) {
+          toast.success('Регистрация прошла успешно!');
+          navigate('/dashboard');
+        } else {
+          toast.error('Ошибка регистрации. Возможно, пользователь уже существует');
+        }
       }
     } catch (error: any) {
       toast.error(error.message || 'Произошла ошибка');
