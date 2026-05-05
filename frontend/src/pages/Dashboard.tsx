@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   FileText,
   MessageSquare,
@@ -14,6 +15,25 @@ import {
   Database,
 } from 'lucide-react';
 import type { Document, ChatSession } from '../types';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5 }
+  }
+};
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -113,6 +133,7 @@ const Dashboard = () => {
       value: stats.totalDocuments,
       icon: FileText,
       color: 'bg-primary-500',
+      gradient: 'from-primary-500 to-primary-600',
       change: '+12%',
       link: '/documents',
     },
@@ -120,7 +141,8 @@ const Dashboard = () => {
       title: 'Indexed Documents',
       value: stats.indexedDocuments,
       icon: Database,
-      color: 'bg-green-500',
+      color: 'bg-accent-green',
+      gradient: 'from-accent-green to-emerald-600',
       change: '+8%',
       link: '/documents',
     },
@@ -128,7 +150,8 @@ const Dashboard = () => {
       title: 'Chat Sessions',
       value: stats.totalChats,
       icon: MessageSquare,
-      color: 'bg-purple-500',
+      color: 'bg-teal-500',
+      gradient: 'from-teal-500 to-cyan-600',
       change: '+23%',
       link: '/chat',
     },
@@ -136,7 +159,8 @@ const Dashboard = () => {
       title: 'Active Projects',
       value: stats.activeProjects,
       icon: Users,
-      color: 'bg-orange-500',
+      color: 'bg-lime-500',
+      gradient: 'from-lime-500 to-green-600',
       change: '+2',
       link: '/projects',
     },
@@ -148,45 +172,49 @@ const Dashboard = () => {
       description: 'Add new documents for analysis',
       icon: Upload,
       link: '/upload',
-      color: 'bg-primary-50 text-primary-700',
+      color: 'bg-primary-50 text-primary-800 border border-primary-200',
+      hover: 'hover:bg-primary-100 hover:border-primary-300',
     },
     {
       title: 'Start New Chat',
       description: 'Ask questions about your documents',
       icon: MessageSquare,
       link: '/chat/new',
-      color: 'bg-purple-50 text-purple-700',
+      color: 'bg-teal-50 text-teal-800 border border-teal-200',
+      hover: 'hover:bg-teal-100 hover:border-teal-300',
     },
     {
       title: 'Use Agent',
       description: 'Advanced analysis with AI agent',
       icon: Bot,
       link: '/agent',
-      color: 'bg-green-50 text-green-700',
+      color: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+      hover: 'hover:bg-emerald-100 hover:border-emerald-300',
     },
     {
       title: 'View Analytics',
       description: 'Usage statistics and insights',
       icon: BarChart3,
       link: '/analytics',
-      color: 'bg-orange-50 text-orange-700',
+      color: 'bg-lime-50 text-lime-800 border border-lime-200',
+      hover: 'hover:bg-lime-100 hover:border-lime-300',
     },
   ];
 
   const getStatusBadge = (status: Document['status']) => {
     const statusConfig = {
-      pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-      processing: { color: 'bg-blue-100 text-blue-800', icon: Clock },
-      indexed: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
-      error: { color: 'bg-red-100 text-red-800', icon: AlertCircle },
+      pending: { color: 'bg-amber-100 text-amber-800 border border-amber-200', icon: Clock },
+      processing: { color: 'bg-primary-100 text-primary-800 border border-primary-200', icon: Clock },
+      indexed: { color: 'bg-emerald-100 text-emerald-800 border border-emerald-200', icon: CheckCircle },
+      error: { color: 'bg-red-100 text-red-800 border border-red-200', icon: AlertCircle },
     };
 
     const config = statusConfig[status];
     const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-        <Icon className="w-3 h-3 mr-1" />
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        <Icon className="w-3 h-3 mr-1.5" />
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
@@ -196,38 +224,44 @@ const Dashboard = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-text-muted">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600">Welcome back! Here's what's happening with your documents.</p>
+        <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
+        <p className="text-text-secondary mt-2">Welcome back! Here's what's happening with your documents.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+      >
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div
+            <motion.div
               key={stat.title}
-              className="bg-white rounded-2xl border border-gray-100 p-6 shadow-soft hover:shadow-medium transition-shadow duration-300 animate-fade-in"
+              variants={itemVariants}
+              className="bg-white rounded-2xl border border-border p-6 shadow-soft hover:shadow-green-glow transition-all duration-300 animate-fade-in hover:-translate-y-1"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-secondary-600">{stat.title}</p>
-                  <p className="mt-2 text-3xl font-bold text-gray-900">{stat.value}</p>
-                  <p className="mt-1 text-sm text-green-600 flex items-center">
+                  <p className="text-sm font-medium text-text-muted">{stat.title}</p>
+                  <p className="mt-2 text-3xl font-bold text-text-primary">{stat.value}</p>
+                  <p className="mt-1 text-sm text-accent-green flex items-center">
                     <ArrowUpRight className="w-4 h-4 mr-1" />
                     {stat.change} from last month
                   </p>
                 </div>
-                <div className={`${stat.color} p-3 rounded-xl`}>
+                <div className={`bg-gradient-to-br ${stat.gradient} p-3 rounded-xl shadow-md`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -238,13 +272,13 @@ const Dashboard = () => {
                 View details
                 <ArrowUpRight className="w-4 h-4 ml-1" />
               </Link>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h2>
+        <h2 className="text-xl font-semibold text-text-primary mb-6">Quick Actions</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
@@ -252,13 +286,13 @@ const Dashboard = () => {
               <Link
                 key={action.title}
                 to={action.link}
-                className="group bg-white rounded-2xl border border-gray-100 p-6 hover:border-primary-300 hover:shadow-medium transition-all duration-300 animate-slide-up"
+                className={`group bg-white rounded-2xl border p-6 transition-all duration-300 animate-slide-up ${action.color} ${action.hover} hover:shadow-green-glow`}
               >
-                <div className={`${action.color} w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:scale-105 transition-transform`}>
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-sm`}>
                   <Icon className="w-7 h-7" />
                 </div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-primary-700 transition-colors">{action.title}</h3>
-                <p className="mt-2 text-sm text-secondary-600">{action.description}</p>
+                <h3 className="font-semibold text-text-primary group-hover:text-primary-700 transition-colors">{action.title}</h3>
+                <p className="mt-2 text-sm text-text-muted">{action.description}</p>
               </Link>
             );
           })}
@@ -266,24 +300,24 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-soft overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-100 bg-gray-50">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Documents</h2>
-            <p className="text-sm text-secondary-600">Latest uploaded documents</p>
+        <div className="bg-white rounded-2xl border border-border shadow-soft overflow-hidden">
+          <div className="px-6 py-5 border-b border-border bg-primary-50">
+            <h2 className="text-lg font-semibold text-text-primary">Recent Documents</h2>
+            <p className="text-sm text-text-muted">Latest uploaded documents</p>
           </div>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-border">
             {recentDocuments.map((doc) => (
-              <div key={doc.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+              <div key={doc.id} className="px-6 py-4 hover:bg-primary-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <FileText className="w-5 h-5 text-secondary-400 mr-3" />
+                    <FileText className="w-5 h-5 text-primary-400 mr-3" />
                     <div>
-                      <p className="font-medium text-gray-900">{doc.filename}</p>
+                      <p className="font-medium text-text-primary">{doc.filename}</p>
                       <div className="flex items-center mt-1 space-x-3">
-                        <span className="text-xs text-secondary-500">
+                        <span className="text-xs text-text-muted">
                           {new Date(doc.created_at).toLocaleDateString()}
                         </span>
-                        <span className="text-xs text-secondary-500">
+                        <span className="text-xs text-text-muted">
                           {(doc.file_size / 1024 / 1024).toFixed(2)} MB
                         </span>
                       </div>
@@ -297,7 +331,7 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
-          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+          <div className="px-6 py-4 border-t border-border bg-primary-50">
             <Link
               to="/documents"
               className="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors inline-flex items-center"
@@ -308,39 +342,39 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-soft overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-100 bg-gray-50">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Chats</h2>
-            <p className="text-sm text-secondary-600">Latest conversations</p>
+        <div className="bg-white rounded-2xl border border-border shadow-soft overflow-hidden">
+          <div className="px-6 py-5 border-b border-border bg-primary-50">
+            <h2 className="text-lg font-semibold text-text-primary">Recent Chats</h2>
+            <p className="text-sm text-text-muted">Latest conversations</p>
           </div>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-border">
             {recentChats.map((chat) => (
               <Link
                 key={chat.id}
                 to={`/chat/${chat.id}`}
-                className="block px-6 py-4 hover:bg-gray-50 transition-colors group"
+                className="block px-6 py-4 hover:bg-primary-50 transition-colors group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <MessageSquare className="w-5 h-5 text-secondary-400 mr-3" />
+                    <MessageSquare className="w-5 h-5 text-primary-400 mr-3" />
                     <div>
-                      <p className="font-medium text-gray-900 group-hover:text-primary-700 transition-colors">{chat.title}</p>
+                      <p className="font-medium text-text-primary group-hover:text-primary-700 transition-colors">{chat.title}</p>
                       <div className="flex items-center mt-1 space-x-3">
-                        <span className="text-xs text-secondary-500">
+                        <span className="text-xs text-text-muted">
                           {new Date(chat.created_at).toLocaleDateString()}
                         </span>
-                        <span className="text-xs text-secondary-500">
+                        <span className="text-xs text-text-muted">
                           {chat.message_count} messages
                         </span>
                       </div>
                     </div>
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-secondary-400 group-hover:text-primary-600 transition-colors" />
+                  <ArrowUpRight className="w-4 h-4 text-primary-400 group-hover:text-primary-600 transition-colors" />
                 </div>
               </Link>
             ))}
           </div>
-          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+          <div className="px-6 py-4 border-t border-border bg-primary-50">
             <Link
               to="/chat"
               className="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors inline-flex items-center"
@@ -352,28 +386,28 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-soft">
-        <h2 className="text-lg font-semibold text-gray-900 mb-6">System Status</h2>
+      <div className="bg-white rounded-2xl border border-border p-6 shadow-soft">
+        <h2 className="text-lg font-semibold text-text-primary mb-6">System Status</h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div className="flex items-center p-4 bg-gray-50 rounded-xl">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-4 animate-pulse"></div>
+          <div className="flex items-center p-4 bg-primary-50 rounded-xl border border-primary-200">
+            <div className="w-3 h-3 bg-accent-green rounded-full mr-4 animate-pulse-green"></div>
             <div>
-              <p className="font-medium text-gray-900">API Server</p>
-              <p className="text-sm text-secondary-600">Operational</p>
+              <p className="font-medium text-text-primary">API Server</p>
+              <p className="text-sm text-text-muted">Operational</p>
             </div>
           </div>
-          <div className="flex items-center p-4 bg-gray-50 rounded-xl">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-4 animate-pulse"></div>
+          <div className="flex items-center p-4 bg-primary-50 rounded-xl border border-primary-200">
+            <div className="w-3 h-3 bg-accent-green rounded-full mr-4 animate-pulse-green"></div>
             <div>
-              <p className="font-medium text-gray-900">Ollama LLM</p>
-              <p className="text-sm text-secondary-600">Connected</p>
+              <p className="font-medium text-text-primary">Ollama LLM</p>
+              <p className="text-sm text-text-muted">Connected</p>
             </div>
           </div>
-          <div className="flex items-center p-4 bg-gray-50 rounded-xl">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-4 animate-pulse"></div>
+          <div className="flex items-center p-4 bg-primary-50 rounded-xl border border-primary-200">
+            <div className="w-3 h-3 bg-accent-green rounded-full mr-4 animate-pulse-green"></div>
             <div>
-              <p className="font-medium text-gray-900">ChromaDB</p>
-              <p className="text-sm text-secondary-600">Online</p>
+              <p className="font-medium text-text-primary">ChromaDB</p>
+              <p className="text-sm text-text-muted">Online</p>
             </div>
           </div>
         </div>
