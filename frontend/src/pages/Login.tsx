@@ -23,8 +23,10 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submit triggered', formData);
     
     if (!formData.email || !formData.password) {
+      console.log('Missing fields');
       toast.error('Пожалуйста, заполните все обязательные поля');
       return;
     }
@@ -36,7 +38,9 @@ const Login = () => {
 
     try {
       if (isLogin) {
+        console.log('Attempting login');
         const success = await login(formData.email, formData.password);
+        console.log('Login result:', success);
         if (success) {
           toast.success('Вход выполнен успешно!');
           navigate('/dashboard');
@@ -44,7 +48,9 @@ const Login = () => {
           toast.error('Неверный email или пароль');
         }
       } else {
-        const success = await register(formData.name, formData.email, formData.password);
+        console.log('Attempting register');
+        const success = await register(formData.email, formData.password, formData.name);
+        console.log('Register result:', success);
         if (success) {
           toast.success('Регистрация прошла успешно!');
           navigate('/dashboard');

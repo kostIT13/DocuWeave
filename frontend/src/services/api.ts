@@ -189,7 +189,7 @@ export const authService = {
     api.post('/auth/login', { email, password }),
   
   register: (email: string, password: string, name: string) =>
-    api.post('/auth/register', { email, password, name }),
+    api.post('/auth/register', { email, password, username: name }),
   
   logout: () => api.post('/auth/logout'),
   
