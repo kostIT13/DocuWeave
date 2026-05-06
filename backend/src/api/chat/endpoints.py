@@ -12,19 +12,23 @@ from src.infrastructure.models.project import Project
 from src.infrastructure.models.message import MessageRole
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from src.api.chat.schemas import ChatHistoryResponse, ChatSessionCreate, ChatSessionListResponse, ChatSessionResponse, ChatSessionUpdate
+from src.api.chat.schemas import (
+    ChatSessionCreate, 
+    ChatSessionResponse, 
+    ChatSessionUpdate
+)
 from src.api.chat.dependencies import ChatSessionServiceDependency
 from src.api.auth.dependencies import CurrentUserDependency
 
 
-router = APIRouter(prefix="/chat-sessions", tags=["Chat Sessions"])
+router = APIRouter(prefix="/projects/{project_id}/chat-sessions", tags=["Chat Sessions"])
 
 
 @router.post("", response_model=ChatSessionResponse, status_code=status.HTTP_201_CREATED)
 async def create_session(
     data: ChatSessionCreate,
     service: ChatSessionServiceDependency,
-    current_project: CurrentProjectDependency,
+    current_project: CurrentProjectDependency, 
     current_user: CurrentUserDependency
 ):
     return await service.create_session(

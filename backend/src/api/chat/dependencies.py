@@ -18,9 +18,10 @@ ChatSessionServiceDependency = Annotated[ChatSessionService, Depends(get_session
 async def get_chat_or_404(
     current_user: CurrentUserDependency,
     chat_service: ChatSessionServiceDependency,
-    chat_id: str = Path(..., description="ID чата")
+    chat_id: str = Path(..., description="ID чата"),
+    project_id: str = Path(..., description="ID проекта")
 ) -> ChatSession:
-    chat = await chat_service.get_chat(chat_id, current_user.id)
+    chat = await chat_service.get_session_by_id(chat_id, project_id, current_user.id)
     
     if not chat:
         raise HTTPException(
