@@ -1,8 +1,8 @@
-"""init models
+"""Initial database schema
 
-Revision ID: 967061e2d209
+Revision ID: 0fdf4cf1d683
 Revises: 
-Create Date: 2026-04-23 19:53:56.783922
+Create Date: 2026-05-06 14:42:16.166202
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '967061e2d209'
+revision: str = '0fdf4cf1d683'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,20 +24,25 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('email', sa.String(length=255), nullable=False),
-    sa.Column('password_hash', sa.String(length=255), nullable=False),
+    sa.Column('username', sa.String(length=255), nullable=False),
+    sa.Column('hashed_password', sa.String(length=255), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('is_superuser', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
     op.create_table('projects',
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('user_id', sa.String(length=36), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('description', sa.String(length=255), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('settings', postgresql.JSONB(astext_type=sa.Text()), server_default='{}', nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -46,30 +51,50 @@ def upgrade() -> None:
     op.create_table('documents',
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('project_id', sa.String(length=36), nullable=False),
-    sa.Column('file_name', sa.String(length=255), nullable=False),
+    sa.Column('filename', sa.String(length=255), nullable=False),
     sa.Column('file_path', sa.String(length=255), nullable=False),
+    sa.Column('file_size', sa.Integer(), nullable=False),
+    sa.Column('file_type', sa.String(length=50), nullable=False),
     sa.Column('mime_type', sa.String(length=255), nullable=False),
     sa.Column('status', sa.Enum('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', name='documentstatus'), nullable=False),
+    sa.Column('content_hash', sa.String(length=64), nullable=True),
     sa.Column('error_message', sa.Text(), nullable=True),
     sa.Column('chunk_count', sa.Integer(), nullable=False),
     sa.Column('metadata_', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), nullable=False),
+    sa.Column('collection_name', sa.String(length=100), nullable=True),
     sa.Column('deleted_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('processed_at', sa.DateTime(timezone=True), nullable=True),
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_documents_content_hash'), 'documents', ['content_hash'], unique=False)
     op.create_index(op.f('ix_documents_id'), 'documents', ['id'], unique=False)
     op.create_index(op.f('ix_documents_project_id'), 'documents', ['project_id'], unique=False)
+    op.create_table('project_settings_history',
+    sa.Column('id', sa.String(length=36), nullable=False),
+    sa.Column('project_id', sa.String(length=36), nullable=False),
+    sa.Column('user_id', sa.String(length=36), nullable=True),
+    sa.Column('old_settings', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('new_settings', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column('changed_fields', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='SET NULL'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_project_settings_history_id'), 'project_settings_history', ['id'], unique=False)
+    op.create_index(op.f('ix_project_settings_history_project_id'), 'project_settings_history', ['project_id'], unique=False)
+    op.create_index(op.f('ix_project_settings_history_user_id'), 'project_settings_history', ['user_id'], unique=False)
     op.create_table('sessions',
     sa.Column('id', sa.String(length=36), nullable=False),
     sa.Column('project_id', sa.String(length=36), nullable=False),
     sa.Column('user_id', sa.String(length=36), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['project_id'], ['projects.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -84,7 +109,7 @@ def upgrade() -> None:
     sa.Column('content', sa.Text(), nullable=False),
     sa.Column('metadata_', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['session_id'], ['sessions.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -98,7 +123,7 @@ def upgrade() -> None:
     sa.Column('output', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('state_snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['session_id'], ['sessions.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -120,12 +145,18 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_sessions_project_id'), table_name='sessions')
     op.drop_index(op.f('ix_sessions_id'), table_name='sessions')
     op.drop_table('sessions')
+    op.drop_index(op.f('ix_project_settings_history_user_id'), table_name='project_settings_history')
+    op.drop_index(op.f('ix_project_settings_history_project_id'), table_name='project_settings_history')
+    op.drop_index(op.f('ix_project_settings_history_id'), table_name='project_settings_history')
+    op.drop_table('project_settings_history')
     op.drop_index(op.f('ix_documents_project_id'), table_name='documents')
     op.drop_index(op.f('ix_documents_id'), table_name='documents')
+    op.drop_index(op.f('ix_documents_content_hash'), table_name='documents')
     op.drop_table('documents')
     op.drop_index(op.f('ix_projects_user_id'), table_name='projects')
     op.drop_index(op.f('ix_projects_id'), table_name='projects')
     op.drop_table('projects')
+    op.drop_index(op.f('ix_users_username'), table_name='users')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_index(op.f('ix_users_email'), table_name='users')
     op.drop_table('users')
