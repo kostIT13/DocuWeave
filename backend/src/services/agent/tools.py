@@ -1,10 +1,10 @@
+# src/services/agent/tools.py
 from typing import Dict, Any, List, Optional
 import logging
-from langchain.tools import tool
-from langchain_core.tools import ToolException
+from langchain_core.tools import tool, ToolException
 
 from src.services.rag import create_rag_orchestrator
-from src.services.llm import LLMService
+from src.services.llm.llm_service import LLMService
 from src.prompts.rag_prompts import rag_prompts
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ class AgentTools:
         self.llm_service = llm_service or LLMService()
         self.rag_orchestrator = create_rag_orchestrator()
     
-    @tool
+    @tool("rag_search")
     def rag_search(
         self,
         query: str,
@@ -23,6 +23,7 @@ class AgentTools:
         project_settings: Dict[str, Any],
         top_k: int = 4
     ) -> List[Dict[str, Any]]:
+        """Search for relevant documents using RAG"""
         try:
             logger.info(f"Вызов инструмента rag_search для запроса: '{query}'")
             
@@ -42,12 +43,13 @@ class AgentTools:
             logger.error(f"Ошибка в инструменте rag_search: {e}", exc_info=True)
             raise ToolException(f"Ошибка поиска документов: {str(e)}")
     
-    @tool
+    @tool("document_analysis")
     def document_analysis(
         self,
         document_content: str,
         analysis_type: str = "summary"
     ) -> Dict[str, Any]:
+        """Analyze document content with specified analysis type"""
         try:
             logger.info(f"Вызов инструмента document_analysis, тип: {analysis_type}")
             
@@ -80,12 +82,13 @@ class AgentTools:
             logger.error(f"Ошибка в инструменте document_analysis: {e}", exc_info=True)
             raise ToolException(f"Ошибка анализа документа: {str(e)}")
     
-    @tool
+    @tool("summarize")
     def summarize(
         self,
         text: str,
         max_length: int = 500
     ) -> str:
+        """Summarize text to specified max length"""
         try:
             logger.info(f"Вызов инструмента summarize, длина текста: {len(text)}")
             
@@ -104,12 +107,13 @@ class AgentTools:
             logger.error(f"Ошибка в инструменте summarize: {e}", exc_info=True)
             raise ToolException(f"Ошибка суммаризации: {str(e)}")
     
-    @tool
+    @tool("extract_entities")
     def extract_entities(
         self,
         text: str,
-        entity_types: List[str] = None
+        entity_types: Optional[List[str]] = None
     ) -> Dict[str, List[str]]:
+        """Extract named entities from text"""
         try:
             logger.info(f"Вызов инструмента extract_entities, типы: {entity_types}")
             
@@ -150,12 +154,13 @@ class AgentTools:
             logger.error(f"Ошибка в инструменте extract_entities: {e}", exc_info=True)
             raise ToolException(f"Ошибка извлечения сущностей: {str(e)}")
     
-    @tool
+    @tool("answer_with_context")
     def answer_with_context(
         self,
         question: str,
         context: List[Dict[str, Any]]
     ) -> str:
+        """Generate answer based on provided context"""
         try:
             logger.info(f"Вызов инструмента answer_with_context, вопрос: '{question}'")
             
@@ -178,12 +183,13 @@ class AgentTools:
             logger.error(f"Ошибка в инструменте answer_with_context: {e}", exc_info=True)
             raise ToolException(f"Ошибка генерации ответа: {str(e)}")
     
-    @tool
+    @tool("classify_query")
     def classify_query(
         self,
         query: str,
-        categories: List[str] = None
+        categories: Optional[List[str]] = None
     ) -> Dict[str, Any]:
+        """Classify user query into predefined categories"""
         try:
             logger.info(f"Вызов инструмента classify_query: '{query}'")
             
@@ -219,6 +225,7 @@ class AgentTools:
             raise ToolException(f"Ошибка классификации запроса: {str(e)}")
     
     def get_all_tools(self) -> List:
+        """Return list of all available tools"""
         return [
             self.rag_search,
             self.document_analysis,

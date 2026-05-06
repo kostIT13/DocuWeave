@@ -28,7 +28,7 @@ class ChatSessionService:
     
 
     async def update_session(self, session_id: str, project_id: str, user_id: str, data: dict) -> Optional[ChatSession]:
-        return await self.repository.update(session_id, project_id, user_id)
+        return await self.repository.update(session_id, project_id, user_id, data)
     
 
     async def delete_session(self, session_id: str, project_id: str, user_id: str) -> bool:

@@ -1,38 +1,41 @@
-from typing import TypedDict, List, Dict, Any, Optional
-from datetime import datetime
+# src/services/agent/state.py
+from typing import TypedDict, List, Dict, Any, Optional, NotRequired
+from datetime import datetime, timezone
 
 
-class AgentState(TypedDict):
+class AgentState(TypedDict, total=False):
+    # Обязательные поля
     input: str
     project_id: str
     user_id: str
     project_settings: Dict[str, Any]
     
-    messages: List[Dict[str, str]]
-    chat_session_id: Optional[str]
+    # Опциональные поля
+    messages: NotRequired[List[Dict[str, str]]]
+    chat_session_id: NotRequired[Optional[str]]
     
-    context: List[Dict[str, Any]]
-    documents: List[Dict[str, Any]]
+    context: NotRequired[List[Dict[str, Any]]]
+    documents: NotRequired[List[Dict[str, Any]]]
     
-    tools_called: List[str]
-    tool_results: List[Dict[str, Any]]
-    available_tools: List[str]
+    tools_called: NotRequired[List[str]]
+    tool_results: NotRequired[List[Dict[str, Any]]]
+    available_tools: NotRequired[List[str]]
     
-    response: Optional[str]
-    intermediate_responses: List[str]
+    response: NotRequired[Optional[str]]
+    intermediate_responses: NotRequired[List[str]]
     
-    metadata: Dict[str, Any]
-    started_at: datetime
-    updated_at: datetime
+    metadata: NotRequired[Dict[str, Any]]
+    started_at: NotRequired[datetime]
+    updated_at: NotRequired[datetime]
     
-    error: Optional[str]
-    should_continue: bool
-    max_steps: int
-    current_step: int
+    error: NotRequired[Optional[str]]
+    should_continue: NotRequired[bool]
+    max_steps: NotRequired[int]
+    current_step: NotRequired[int]
     
-    needs_rag: bool
-    needs_tool: bool
-    is_final: bool
+    needs_rag: NotRequired[bool]
+    needs_tool: NotRequired[bool]
+    is_final: NotRequired[bool]
 
 
 def create_initial_state(
@@ -43,7 +46,7 @@ def create_initial_state(
     chat_session_id: Optional[str] = None,
     initial_messages: Optional[List[Dict[str, str]]] = None
 ) -> AgentState:
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     
     return {
         "input": input_text,
@@ -85,10 +88,10 @@ def create_initial_state(
 
 
 def update_state_timestamp(state: AgentState) -> AgentState:
-    state["updated_at"] = datetime.utcnow()
-    state["current_step"] += 1
+    state["updated_at"] = datetime.now(timezone.utc)
+    state["current_step"] = state.get("current_step", 0) + 1
     
-    if state["current_step"] >= state["max_steps"]:
+    if state["current_step"] >= state.get("max_steps", 10):
         state["should_continue"] = False
         state["error"] = "Достигнуто максимальное количество шагов"
     
@@ -104,13 +107,13 @@ def add_message_to_state(
     message = {
         "role": role,
         "content": content,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
     
     if metadata:
         message["metadata"] = metadata
     
-    state["messages"].append(message)
+    state.setdefault("messages", []).append(message)
     return state
 
 
@@ -120,12 +123,12 @@ def add_tool_result_to_state(
     result: Any,
     success: bool = True
 ) -> AgentState:
-    state["tools_called"].append(tool_name)
-    state["tool_results"].append({
+    state.setdefault("tools_called", []).append(tool_name)
+    state.setdefault("tool_results", []).append({
         "tool": tool_name,
         "result": result,
         "success": success,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     })
     
     return state

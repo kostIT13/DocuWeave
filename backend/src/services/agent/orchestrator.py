@@ -1,7 +1,8 @@
+# src/services/agent/orchestrator.py
 from typing import Dict, Any, Optional, List
 import logging
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.services.agent.state import (
     AgentState, 
@@ -9,7 +10,7 @@ from src.services.agent.state import (
     update_state_timestamp
 )
 from src.services.agent.graph import AgentGraph
-from src.services.llm import LLMService
+from src.services.llm.llm_service import LLMService
 from src.services.rag import create_rag_orchestrator
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class AgentOrchestrator:
             f"проект: {project_id}, пользователь: {user_id}"
         )
         
-        start_time = datetime.now()
+        start_time = datetime.now(timezone.utc)
         
         try:
             initial_state = create_initial_state(
@@ -53,7 +54,7 @@ class AgentOrchestrator:
             
             result = self.agent_graph.run(initial_state)
             
-            processing_time = (datetime.now() - start_time).total_seconds()
+            processing_time = (datetime.now(timezone.utc) - start_time).total_seconds()
             result["processing_time"] = processing_time
             result["agent_version"] = "1.0.0"
             
@@ -74,7 +75,7 @@ class AgentOrchestrator:
                 "tools_used": [],
                 "steps": 0,
                 "context": [],
-                "processing_time": (datetime.now() - start_time).total_seconds(),
+                "processing_time": (datetime.now(timezone.utc) - start_time).total_seconds(),
                 "agent_version": "1.0.0"
             }
     
