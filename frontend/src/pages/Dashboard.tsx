@@ -1,39 +1,13 @@
+// frontend/src/pages/Dashboard.tsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-  FileText,
-  MessageSquare,
-  Bot,
-  Upload,
-  BarChart3,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  ArrowUpRight,
-  Users,
-  Database,
+  FileText, MessageSquare, Bot, Upload, BarChart3,
+  Clock, CheckCircle, AlertCircle, ArrowUpRight,
+  Users, Database, Loader2,
 } from 'lucide-react';
+import { documentService, chatService, projectService } from '../services/api';
 import type { Document, ChatSession } from '../types';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 }
-  }
-};
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -45,104 +19,88 @@ const Dashboard = () => {
   const [recentDocuments, setRecentDocuments] = useState<Document[]>([]);
   const [recentChats, setRecentChats] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [systemStatus, setSystemStatus] = useState({
+    api: 'checking',
+    llm: 'checking',
+    vector: 'checking',
+  });
+
+  // TODO: Заменить на реальный project_id
+  const currentProjectId = 'current-project-id';
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
-      try {
-        setStats({
-          totalDocuments: 42,
-          indexedDocuments: 38,
-          totalChats: 15,
-          activeProjects: 3,
-        });
-
-        setRecentDocuments([
-          {
-            id: '1',
-            project_id: '1',
-            filename: 'Annual_Report_2024.pdf',
-            mime_type: 'application/pdf',
-            file_size: 2456789,
-            status: 'indexed',
-            created_at: '2026-05-01T10:30:00Z',
-            updated_at: '2026-05-01T10:35:00Z',
-          },
-          {
-            id: '2',
-            project_id: '1',
-            filename: 'Project_Proposal.docx',
-            mime_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            file_size: 123456,
-            status: 'processing',
-            created_at: '2026-05-02T14:20:00Z',
-            updated_at: '2026-05-02T14:20:00Z',
-          },
-          {
-            id: '3',
-            project_id: '2',
-            filename: 'Technical_Specifications.txt',
-            mime_type: 'text/plain',
-            file_size: 78901,
-            status: 'error',
-            error_message: 'Failed to parse document',
-            created_at: '2026-05-03T09:15:00Z',
-            updated_at: '2026-05-03T09:20:00Z',
-          },
-        ]);
-
-        setRecentChats([
-          {
-            id: '1',
-            project_id: '1',
-            title: 'Annual Report Analysis',
-            created_at: '2026-05-02T16:45:00Z',
-            updated_at: '2026-05-02T17:30:00Z',
-            message_count: 12,
-          },
-          {
-            id: '2',
-            project_id: '1',
-            title: 'Project Requirements',
-            created_at: '2026-05-01T11:20:00Z',
-            updated_at: '2026-05-01T12:15:00Z',
-            message_count: 8,
-          },
-          {
-            id: '3',
-            project_id: '2',
-            title: 'Technical Discussion',
-            created_at: '2026-04-30T09:30:00Z',
-            updated_at: '2026-04-30T10:45:00Z',
-            message_count: 15,
-          },
-        ]);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchDashboardData();
+    checkSystemStatus();
   }, []);
+
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    try {
+      const [docsRes, chatsRes, projectsRes] = await Promise.allSettled([
+        documentService.getDocuments(currentProjectId),
+        chatService.getSessions(currentProjectId),
+        projectService.getProjects(),
+      ]);
+
+      const docs = docsRes.status === 'fulfilled' && docsRes.value.success ? docsRes.value.data || [] : [];
+      const chats = chatsRes.status === 'fulfilled' && chatsRes.value.success ? chatsRes.value.data || [] : [];
+      const projects = projectsRes.status === 'fulfilled' && projectsRes.value.success ? projectsRes.value.data || [] : [];
+
+      setStats({
+        totalDocuments: docs.length,
+        indexedDocuments: docs.filter((d: Document) => d.status === 'indexed').length,
+        totalChats: chats.length,
+        activeProjects: projects.length,
+      });
+
+      setRecentDocuments(docs.slice(0, 3));
+      setRecentChats(chats.slice(0, 3));
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkSystemStatus = async () => {
+    try {
+      // Проверка бэкенда
+      const apiRes = await fetch('/api/health').catch(() => null);
+      setSystemStatus(prev => ({ ...prev, api: apiRes?.ok ? 'healthy' : 'error' }));
+      
+      // Проверка Ollama (через прокси бэкенда)
+      const llmRes = await fetch('/api/agent/health').catch(() => null);
+      setSystemStatus(prev => ({ ...prev, llm: llmRes?.ok ? 'healthy' : 'error' }));
+      
+      // Chroma считается рабочим если бэкенд работает
+      setSystemStatus(prev => ({ ...prev, vector: prev.api === 'healthy' ? 'healthy' : 'error' }));
+    } catch {
+      setSystemStatus({ api: 'error', llm: 'error', vector: 'error' });
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    return {
+      healthy: 'bg-green-100 text-green-800',
+      error: 'bg-red-100 text-red-800',
+      checking: 'bg-yellow-100 text-yellow-800',
+    }[status] || 'bg-gray-100 text-gray-800';
+  };
 
   const statCards = [
     {
       title: 'Total Documents',
       value: stats.totalDocuments,
       icon: FileText,
-      color: 'bg-primary-500',
-      gradient: 'from-primary-500 to-primary-600',
+      gradient: 'from-blue-500 to-blue-600',
       change: '+12%',
       link: '/documents',
     },
     {
-      title: 'Indexed Documents',
+      title: 'Indexed',
       value: stats.indexedDocuments,
       icon: Database,
-      color: 'bg-accent-green',
-      gradient: 'from-accent-green to-emerald-600',
+      gradient: 'from-green-500 to-emerald-600',
       change: '+8%',
       link: '/documents',
     },
@@ -150,71 +108,38 @@ const Dashboard = () => {
       title: 'Chat Sessions',
       value: stats.totalChats,
       icon: MessageSquare,
-      color: 'bg-teal-500',
       gradient: 'from-teal-500 to-cyan-600',
       change: '+23%',
       link: '/chat',
     },
     {
-      title: 'Active Projects',
+      title: 'Projects',
       value: stats.activeProjects,
       icon: Users,
-      color: 'bg-lime-500',
-      gradient: 'from-lime-500 to-green-600',
+      gradient: 'from-purple-500 to-violet-600',
       change: '+2',
       link: '/projects',
     },
   ];
 
   const quickActions = [
-    {
-      title: 'Upload Document',
-      description: 'Add new documents for analysis',
-      icon: Upload,
-      link: '/upload',
-      color: 'bg-primary-50 text-primary-800 border border-primary-200',
-      hover: 'hover:bg-primary-100 hover:border-primary-300',
-    },
-    {
-      title: 'Start New Chat',
-      description: 'Ask questions about your documents',
-      icon: MessageSquare,
-      link: '/chat/new',
-      color: 'bg-teal-50 text-teal-800 border border-teal-200',
-      hover: 'hover:bg-teal-100 hover:border-teal-300',
-    },
-    {
-      title: 'Use Agent',
-      description: 'Advanced analysis with AI agent',
-      icon: Bot,
-      link: '/agent',
-      color: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
-      hover: 'hover:bg-emerald-100 hover:border-emerald-300',
-    },
-    {
-      title: 'View Analytics',
-      description: 'Usage statistics and insights',
-      icon: BarChart3,
-      link: '/analytics',
-      color: 'bg-lime-50 text-lime-800 border border-lime-200',
-      hover: 'hover:bg-lime-100 hover:border-lime-300',
-    },
+    { title: 'Upload', desc: 'Add documents', icon: Upload, link: '/upload', color: 'bg-blue-50 text-blue-700' },
+    { title: 'New Chat', desc: 'Start conversation', icon: MessageSquare, link: '/chat', color: 'bg-teal-50 text-teal-700' },
+    { title: 'AI Agent', desc: 'Advanced analysis', icon: Bot, link: '/agent', color: 'bg-purple-50 text-purple-700' },
+    { title: 'Analytics', desc: 'View insights', icon: BarChart3, link: '/analytics', color: 'bg-orange-50 text-orange-700' },
   ];
 
   const getStatusBadge = (status: Document['status']) => {
-    const statusConfig = {
-      pending: { color: 'bg-amber-100 text-amber-800 border border-amber-200', icon: Clock },
-      processing: { color: 'bg-primary-100 text-primary-800 border border-primary-200', icon: Clock },
-      indexed: { color: 'bg-emerald-100 text-emerald-800 border border-emerald-200', icon: CheckCircle },
-      error: { color: 'bg-red-100 text-red-800 border border-red-200', icon: AlertCircle },
+    const config: Record<string, { color: string; icon: any }> = {
+      pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+      processing: { color: 'bg-blue-100 text-blue-800', icon: Clock },
+      indexed: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
+      error: { color: 'bg-red-100 text-red-800', icon: AlertCircle },
     };
-
-    const config = statusConfig[status];
-    const Icon = config.icon;
-
+    const { color, icon: Icon } = config[status] || config.pending;
     return (
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
-        <Icon className="w-3 h-3 mr-1.5" />
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color}`}>
+        <Icon className="w-3 h-3 mr-1" />
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
@@ -223,193 +148,185 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-text-muted">Loading dashboard...</p>
-        </div>
+        <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+        <p className="ml-4 text-gray-600">Loading dashboard...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-text-primary">Dashboard</h1>
-        <p className="text-text-secondary mt-2">Welcome back! Here's what's happening with your documents.</p>
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600 mt-2">Welcome back! Here's what's happening.</p>
       </div>
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
-      >
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <motion.div
+            <Link
               key={stat.title}
-              variants={itemVariants}
-              className="bg-white rounded-2xl border border-border p-6 shadow-soft hover:shadow-green-glow transition-all duration-300 animate-fade-in hover:-translate-y-1"
+              to={stat.link}
+              className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all group"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-text-muted">{stat.title}</p>
-                  <p className="mt-2 text-3xl font-bold text-text-primary">{stat.value}</p>
-                  <p className="mt-1 text-sm text-accent-green flex items-center">
+                  <p className="text-sm text-gray-600">{stat.title}</p>
+                  <p className="mt-2 text-3xl font-bold text-gray-900">{stat.value}</p>
+                  <p className="mt-1 text-sm text-green-600 flex items-center">
                     <ArrowUpRight className="w-4 h-4 mr-1" />
-                    {stat.change} from last month
+                    {stat.change} this month
                   </p>
                 </div>
-                <div className={`bg-gradient-to-br ${stat.gradient} p-3 rounded-xl shadow-md`}>
+                <div className={`bg-gradient-to-br ${stat.gradient} p-3 rounded-xl`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
               </div>
-              <Link
-                to={stat.link}
-                className="mt-4 inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors"
-              >
-                View details
-                <ArrowUpRight className="w-4 h-4 ml-1" />
-              </Link>
-            </motion.div>
+            </Link>
           );
         })}
-      </motion.div>
+      </div>
 
+      {/* Quick Actions */}
       <div>
-        <h2 className="text-xl font-semibold text-text-primary mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
               <Link
                 key={action.title}
                 to={action.link}
-                className={`group bg-white rounded-2xl border p-6 transition-all duration-300 animate-slide-up ${action.color} ${action.hover} hover:shadow-green-glow`}
+                className={`${action.color} rounded-xl border p-5 hover:shadow-md transition-all group`}
               >
-                <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-sm`}>
-                  <Icon className="w-7 h-7" />
+                <div className="w-12 h-12 rounded-lg bg-white/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="font-semibold text-text-primary group-hover:text-primary-700 transition-colors">{action.title}</h3>
-                <p className="mt-2 text-sm text-text-muted">{action.description}</p>
+                <h3 className="font-semibold">{action.title}</h3>
+                <p className="mt-1 text-sm opacity-80">{action.desc}</p>
               </Link>
             );
           })}
         </div>
       </div>
 
+      {/* Recent Items */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="bg-white rounded-2xl border border-border shadow-soft overflow-hidden">
-          <div className="px-6 py-5 border-b border-border bg-primary-50">
-            <h2 className="text-lg font-semibold text-text-primary">Recent Documents</h2>
-            <p className="text-sm text-text-muted">Latest uploaded documents</p>
+        {/* Recent Documents */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h3 className="font-semibold">Recent Documents</h3>
           </div>
-          <div className="divide-y divide-border">
-            {recentDocuments.map((doc) => (
-              <div key={doc.id} className="px-6 py-4 hover:bg-primary-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <FileText className="w-5 h-5 text-primary-400 mr-3" />
-                    <div>
-                      <p className="font-medium text-text-primary">{doc.filename}</p>
-                      <div className="flex items-center mt-1 space-x-3">
-                        <span className="text-xs text-text-muted">
-                          {new Date(doc.created_at).toLocaleDateString()}
-                        </span>
-                        <span className="text-xs text-text-muted">
-                          {(doc.file_size / 1024 / 1024).toFixed(2)} MB
-                        </span>
+          <div className="divide-y divide-gray-100">
+            {recentDocuments.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p>No documents yet</p>
+                <Link to="/documents" className="text-blue-600 hover:underline mt-2 inline-block">
+                  Upload your first document
+                </Link>
+              </div>
+            ) : (
+              recentDocuments.map((doc) => (
+                <div key={doc.id} className="px-6 py-4 hover:bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center min-w-0">
+                      <FileText className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{doc.filename}</p>
+                        <p className="text-sm text-gray-500">
+                          {new Date(doc.created_at).toLocaleDateString()} • {doc.file_size ? `${Math.round(doc.file_size / 1024 / 1024)} MB` : ''}
+                        </p>
                       </div>
                     </div>
+                    {getStatusBadge(doc.status)}
                   </div>
-                  {getStatusBadge(doc.status)}
                 </div>
-                {doc.error_message && (
-                  <p className="mt-2 text-xs text-red-600">{doc.error_message}</p>
-                )}
-              </div>
-            ))}
+              ))
+            )}
           </div>
-          <div className="px-6 py-4 border-t border-border bg-primary-50">
-            <Link
-              to="/documents"
-              className="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors inline-flex items-center"
-            >
-              View all documents
-              <ArrowUpRight className="w-4 h-4 ml-1" />
+          <div className="px-6 py-3 border-t border-gray-200 bg-gray-50">
+            <Link to="/documents" className="text-sm text-blue-600 hover:underline flex items-center">
+              View all documents <ArrowUpRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-border shadow-soft overflow-hidden">
-          <div className="px-6 py-5 border-b border-border bg-primary-50">
-            <h2 className="text-lg font-semibold text-text-primary">Recent Chats</h2>
-            <p className="text-sm text-text-muted">Latest conversations</p>
+        {/* Recent Chats */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h3 className="font-semibold">Recent Chats</h3>
           </div>
-          <div className="divide-y divide-border">
-            {recentChats.map((chat) => (
-              <Link
-                key={chat.id}
-                to={`/chat/${chat.id}`}
-                className="block px-6 py-4 hover:bg-primary-50 transition-colors group"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <MessageSquare className="w-5 h-5 text-primary-400 mr-3" />
-                    <div>
-                      <p className="font-medium text-text-primary group-hover:text-primary-700 transition-colors">{chat.title}</p>
-                      <div className="flex items-center mt-1 space-x-3">
-                        <span className="text-xs text-text-muted">
+          <div className="divide-y divide-gray-100">
+            {recentChats.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p>No chats yet</p>
+                <Link to="/chat" className="text-blue-600 hover:underline mt-2 inline-block">
+                  Start your first chat
+                </Link>
+              </div>
+            ) : (
+              recentChats.map((chat) => (
+                <Link
+                  key={chat.id}
+                  to={`/chat/${chat.id}`}
+                  className="block px-6 py-4 hover:bg-gray-50 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center min-w-0">
+                      <MessageSquare className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 truncate group-hover:text-blue-600">
+                          {chat.title}
+                        </p>
+                        <p className="text-sm text-gray-500">
                           {new Date(chat.created_at).toLocaleDateString()}
-                        </span>
-                        <span className="text-xs text-text-muted">
-                          {chat.message_count} messages
-                        </span>
+                        </p>
                       </div>
                     </div>
+                    <ArrowUpRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-primary-400 group-hover:text-primary-600 transition-colors" />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+            )}
           </div>
-          <div className="px-6 py-4 border-t border-border bg-primary-50">
-            <Link
-              to="/chat"
-              className="text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors inline-flex items-center"
-            >
-              View all chats
-              <ArrowUpRight className="w-4 h-4 ml-1" />
+          <div className="px-6 py-3 border-t border-gray-200 bg-gray-50">
+            <Link to="/chat" className="text-sm text-blue-600 hover:underline flex items-center">
+              View all chats <ArrowUpRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-border p-6 shadow-soft">
-        <h2 className="text-lg font-semibold text-text-primary mb-6">System Status</h2>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div className="flex items-center p-4 bg-primary-50 rounded-xl border border-primary-200">
-            <div className="w-3 h-3 bg-accent-green rounded-full mr-4 animate-pulse-green"></div>
-            <div>
-              <p className="font-medium text-text-primary">API Server</p>
-              <p className="text-sm text-text-muted">Operational</p>
+      {/* System Status */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="font-semibold text-gray-900 mb-4">System Status</h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[
+            { label: 'API Server', key: 'api' },
+            { label: 'Ollama LLM', key: 'llm' },
+            { label: 'Vector DB', key: 'vector' },
+          ].map((item) => (
+            <div key={item.key} className="flex items-center p-4 bg-gray-50 rounded-lg">
+              <div className={`w-3 h-3 rounded-full mr-3 ${
+                systemStatus[item.key as keyof typeof systemStatus] === 'healthy' 
+                  ? 'bg-green-500 animate-pulse' 
+                  : systemStatus[item.key as keyof typeof systemStatus] === 'error'
+                  ? 'bg-red-500'
+                  : 'bg-yellow-500 animate-pulse'
+              }`} />
+              <div>
+                <p className="font-medium text-gray-900">{item.label}</p>
+                <p className="text-sm text-gray-600 capitalize">
+                  {systemStatus[item.key as keyof typeof systemStatus]}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center p-4 bg-primary-50 rounded-xl border border-primary-200">
-            <div className="w-3 h-3 bg-accent-green rounded-full mr-4 animate-pulse-green"></div>
-            <div>
-              <p className="font-medium text-text-primary">Ollama LLM</p>
-              <p className="text-sm text-text-muted">Connected</p>
-            </div>
-          </div>
-          <div className="flex items-center p-4 bg-primary-50 rounded-xl border border-primary-200">
-            <div className="w-3 h-3 bg-accent-green rounded-full mr-4 animate-pulse-green"></div>
-            <div>
-              <p className="font-medium text-text-primary">ChromaDB</p>
-              <p className="text-sm text-text-muted">Online</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+// frontend/src/pages/Login.tsx
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
@@ -10,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 
 const Login = () => {
   const navigate = useNavigate()
-  const { login, register, isLoading } = useAuth()
+  const { login, register, isLoading, error: authError } = useAuth() // ✅ Достаём error из хука
   const [isLogin, setIsLogin] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -28,15 +29,18 @@ const Login = () => {
       } else {
         success = await register(formData.email, formData.password, formData.name)
       }
+      
       if (success) {
         toast.success(isLogin ? 'Вход выполнен!' : 'Регистрация успешна!')
         navigate('/')
       } else {
-        toast.error('Ошибка аутентификации')
+        // ✅ Показываем ошибку из хука или дефолтную
+        toast.error(authError || 'Ошибка аутентификации')
       }
-    } catch (error) {
-      toast.error('Произошла ошибка')
-      console.error(error)
+    } catch (error: any) {
+      const message = error?.message || authError || 'Произошла ошибка'
+      toast.error(message)
+      console.error('Auth error:', error)
     }
   }
 
@@ -100,7 +104,8 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                    tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -121,6 +126,7 @@ const Login = () => {
                 <button
                   onClick={() => setIsLogin(!isLogin)}
                   className="text-primary font-medium hover:underline"
+                  type="button"
                 >
                   {isLogin ? 'Зарегистрироваться' : 'Войти'}
                 </button>
