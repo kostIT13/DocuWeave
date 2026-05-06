@@ -1,3 +1,4 @@
+// src/hooks/useAuth.ts
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService, api } from '../services/api';
@@ -11,6 +12,8 @@ interface UseAuthReturn {
   register: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
+  // ✅ Добавляем новую функцию
+  updateProfile: (userData: Partial<User>) => Promise<boolean>; 
 }
 
 export const useAuth = (): UseAuthReturn => {
@@ -53,7 +56,8 @@ export const useAuth = (): UseAuthReturn => {
     return {
       id: userData.id,
       email: userData.email,
-      name: userData.username || userData.name || '',
+      // ✅ Унифицируем: берем username или name
+      name: userData.username || userData.name || '', 
       created_at: userData.created_at,
     };
   };
@@ -125,6 +129,29 @@ export const useAuth = (): UseAuthReturn => {
     }
   }, [navigate]);
 
+  // ✅ Новая функция для обновления профиля (сохранение в БД)
+  const updateProfile = useCallback(async (userData: Partial<User>): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      // Вызываем API сервис
+      const response = await authService.updateProfile(userData);
+      
+      if (response.success && response.data) {
+        // Обновляем локальный стейт новыми данными с сервера
+        setUser(transformUser(response.data));
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Update profile error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update profile');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Старая функция (только для UI без сохранения)
   const updateUser = useCallback((userData: Partial<User>) => {
     setUser(prev => prev ? { ...prev, ...userData } : null);
   }, []);
@@ -137,6 +164,7 @@ export const useAuth = (): UseAuthReturn => {
     register,
     logout,
     updateUser,
+    updateProfile, // ✅ Возвращаем новую функцию
   };
 };
 

@@ -1,3 +1,4 @@
+// frontend/src/services/api.ts
 import type { ApiResponse } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -194,6 +195,10 @@ export const authService = {
   logout: () => api.post('/auth/logout'),
   
   getCurrentUser: () => api.get('/auth/me'),
+  
+  // ✅ ДОБАВЛЕНО: Обновление профиля пользователя
+  updateProfile: (data: { name?: string; email?: string }) =>
+    api.patch('/auth/profile', data),
 };
 
 export const projectService = {
