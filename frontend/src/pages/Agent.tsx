@@ -1,7 +1,7 @@
 // frontend/src/pages/Agent.tsx
 import { useState, useEffect, useRef } from 'react';
 import {
-  Bot, Send, FileText, Search, Zap, Brain,
+  Bot, Send, Brain,
   CheckCircle, Copy, RefreshCw, Settings, Loader2,
 } from 'lucide-react';
 import { agentService, documentService } from '../services/api';
@@ -167,15 +167,6 @@ const Agent = () => {
     }
   };
 
-  const getToolIcon = (toolName: string) => {
-    const icons: Record<string, React.ReactNode> = {
-      rag_search: <Search className="w-3 h-3" />,
-      document_analysis: <FileText className="w-3 h-3" />,
-      summarize: <Brain className="w-3 h-3" />,
-      extract_entities: <Zap className="w-3 h-3" />,
-    };
-    return icons[toolName] || <Bot className="w-3 h-3" />;
-  };
 
   return (
     <div className="space-y-6">
