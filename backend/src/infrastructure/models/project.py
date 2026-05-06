@@ -20,8 +20,18 @@ class Project(Base):
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, default="Название проекта")
     description: Mapped[str] = mapped_column(String(255), nullable=False, default="Описание проекта")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+    
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        onupdate=func.now,          
+        server_default=func.now()   
+    )
+    
     settings: Mapped[dict] = mapped_column(JSONB, default=lambda: {}, server_default="{}", nullable=False)
 
     user: Mapped["User"] = relationship("User", back_populates='projects')
