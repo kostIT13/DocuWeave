@@ -28,7 +28,7 @@ from src.services.llm.llm_service import LLMService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/agent", tags=["agent"])
+router = APIRouter(prefix="/agent", tags=["Agent"])
 
 
 @router.post("/query", response_model=AgentResponse, status_code=status.HTTP_200_OK)
