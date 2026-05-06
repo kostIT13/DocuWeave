@@ -1,3 +1,4 @@
+// frontend/src/layouts/MainLayout.tsx
 import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -42,14 +43,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="min-h-screen bg-background-offwhite">
+    // ✅ Главный контейнер на весь экран
+    <div className="flex h-screen bg-background-offwhite overflow-hidden">
+      
+      {/* ✅ Sidebar - фиксированный слева */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-border transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between h-16 px-4 border-b border-border bg-gradient-to-r from-primary-50 to-white">
+          {/* Logo */}
+          <div className="flex items-center justify-between h-16 px-4 border-b border-border bg-gradient-to-r from-primary-50 to-white flex-shrink-0">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shadow-green-glow">
                 <FileText className="w-5 h-5 text-white" />
@@ -64,7 +69,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </button>
           </div>
 
-          <div className="px-4 py-3 border-b border-border bg-primary-50">
+          {/* Project Selector */}
+          <div className="px-4 py-3 border-b border-border bg-primary-50 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-accent-green rounded-full animate-pulse-green"></div>
@@ -81,6 +87,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </select>
           </div>
 
+          {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
             {navigation.map((item) => {
               const Icon = item.icon;
@@ -102,7 +109,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             })}
           </nav>
 
-          <div className="px-4 py-4 border-t border-border">
+          {/* Upload Button */}
+          <div className="px-4 py-4 border-t border-border flex-shrink-0">
             <Link
               to="/upload"
               className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-primary-500 to-accent-green rounded-lg hover:from-primary-600 hover:to-accent-emerald transition-all shadow-md hover:shadow-green-glow"
@@ -112,7 +120,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </Link>
           </div>
 
-          <div className="px-4 py-4 border-t border-border bg-primary-50">
+          {/* User Menu */}
+          <div className="px-4 py-4 border-t border-border bg-primary-50 flex-shrink-0">
             <div className="relative">
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -123,24 +132,25 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <User className="w-4 h-4 text-primary-700" />
                   </div>
                   <div className="ml-3">
-                    <p className="font-medium text-text-primary">{user?.name || 'User'}</p>
-                    <p className="text-xs text-text-muted">{user?.email || 'user@example.com'}</p>
+                    <p className="font-medium text-text-primary truncate">{user?.name || 'User'}</p>
+                    <p className="text-xs text-text-muted truncate">{user?.email || 'user@example.com'}</p>
                   </div>
                 </div>
-                <ChevronDown className="w-4 h-4 text-primary-600" />
+                <ChevronDown className="w-4 h-4 text-primary-600 flex-shrink-0" />
               </button>
 
               {userMenuOpen && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-lg border border-primary-200 py-1">
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-lg border border-primary-200 py-1 z-50">
                   <Link
                     to="/profile"
                     className="flex items-center px-4 py-2 text-sm text-text-secondary hover:bg-primary-50"
+                    onClick={() => setUserMenuOpen(false)}
                   >
                     <User className="w-4 h-4 mr-2 text-primary-600" />
                     Profile
                   </Link>
                   <button
-                    onClick={logout}
+                    onClick={() => { logout(); setUserMenuOpen(false); }}
                     className="flex items-center w-full px-4 py-2 text-sm text-text-secondary hover:bg-primary-50"
                   >
                     <LogOut className="w-4 h-4 mr-2 text-primary-600" />
@@ -153,8 +163,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-4 bg-white border-b border-border lg:hidden">
+      {/* ✅ Main Content Area - flex column layout */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        {/* Mobile Header */}
+        <header className="sticky top-0 z-40 flex items-center justify-between h-16 px-4 bg-white border-b border-border lg:hidden flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-md text-primary-600 hover:text-primary-800 hover:bg-primary-50"
@@ -167,14 +180,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </div>
             <span className="text-lg font-bold text-text-primary">DocuWeave</span>
           </div>
-          <div className="w-10"></div>
+          <div className="w-10"></div> {/* Spacer for centering */}
         </header>
 
-        <main className="min-h-[calc(100vh-4rem)] p-4 lg:p-6 bg-background-white rounded-tl-2xl lg:rounded-tl-3xl shadow-soft">
+        {/* ✅ Page Content - с правильными отступами */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-background-white">
+          {/* ✅ Убраны rounded-tl и shadow-soft, которые создавали визуальные разрывы */}
           {children}
         </main>
       </div>
 
+      {/* Overlay для мобильного меню */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
