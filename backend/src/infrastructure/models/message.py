@@ -4,7 +4,7 @@ from sqlalchemy import String, ForeignKey, Enum, Text, DateTime, func
 import uuid
 import enum
 from typing import Optional, TYPE_CHECKING, List
-from datetime import datetime 
+from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import JSONB
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ class Message(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     metadata_: Mapped[Optional[dict]] = mapped_column(JSONB, default=lambda: {}, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc))
 
     chat_session: Mapped["ChatSession"] = relationship("ChatSession", back_populates='messages')
     

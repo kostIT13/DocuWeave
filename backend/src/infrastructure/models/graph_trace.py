@@ -2,8 +2,8 @@ from src.infrastructure.core.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey, DateTime, func
 import uuid 
-from typing import Optional, TYPE_CHECKING, List
-from datetime import datetime
+from typing import Optional, TYPE_CHECKING
+from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import JSONB
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ class GraphTrace(Base):
     output: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     state_snapshot: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc))
 
     chat_session: Mapped["ChatSession"] = relationship("ChatSession", back_populates="traces")
 

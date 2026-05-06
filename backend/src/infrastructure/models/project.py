@@ -2,7 +2,7 @@ from src.infrastructure.core.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey, DateTime, func
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -28,8 +28,7 @@ class Project(Base):
     
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), 
-        onupdate=func.now,          
-        server_default=func.now()   
+        default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc)
     )
     
     settings: Mapped[dict] = mapped_column(JSONB, default=lambda: {}, server_default="{}", nullable=False)

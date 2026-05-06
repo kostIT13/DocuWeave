@@ -2,7 +2,7 @@ from src.infrastructure.core.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, ForeignKey, DateTime, func
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ class ChatSession(Base):
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), default="Новый чат")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),onupdate=lambda: datetime.now(timezone.utc))
 
     user: Mapped["User"] = relationship("User", back_populates='sessions')
     project: Mapped["Project"] = relationship("Project", back_populates='sessions')
