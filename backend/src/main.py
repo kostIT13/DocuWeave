@@ -13,6 +13,7 @@ from src.api.auth.endpoints import router as auth_router
 from src.api.chat.endpoints import router as chat_router
 from src.api.document.endpoints import router as document_router
 from src.api.project.endpoints import router as project_router
+from src.api.agent.endpoints import router as agent_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -26,6 +27,7 @@ app.include_router(auth_router)
 app.include_router(chat_router)
 app.include_router(document_router)
 app.include_router(project_router)
+app.include_router(agent_router)
 
 
 app.add_middleware(
