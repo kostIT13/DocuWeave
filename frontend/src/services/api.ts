@@ -196,7 +196,6 @@ export const authService = {
   
   getCurrentUser: () => api.get('/auth/me'),
   
-  // ✅ ДОБАВЛЕНО: Обновление профиля пользователя
   updateProfile: (data: { name?: string; email?: string }) =>
     api.patch('/auth/profile', data),
 };
@@ -215,38 +214,47 @@ export const projectService = {
   deleteProject: (id: string) => api.delete(`/projects/${id}`),
 };
 
+
 export const documentService = {
   getDocuments: (projectId: string) =>
-    api.get(`/documents?project_id=${projectId}`),
+    api.get(`/projects/${projectId}/documents`),
   
   uploadDocument: (projectId: string, file: File) =>
-    api.uploadFile('/documents/upload', file, { project_id: projectId }),
+    api.uploadFile(`/projects/${projectId}/documents/upload`, file),
   
   deleteDocument: (documentId: string, projectId: string, hard: boolean = false) =>
-    api.delete(`/documents/${documentId}?project_id=${projectId}&hard=${hard}`),
+    api.delete(`/projects/${projectId}/documents/${documentId}?hard=${hard}`),
   
   retryIndexing: (documentId: string, projectId: string) =>
-    api.post(`/documents/${documentId}/retry?project_id=${projectId}`),
+    api.post(`/projects/${projectId}/documents/${documentId}/retry`),
 };
 
 export const chatService = {
   getSessions: (projectId: string) =>
-    api.get(`/chat/sessions?project_id=${projectId}`),
+    api.get(`/projects/${projectId}/chat-sessions`),
   
   createSession: (projectId: string, title?: string) =>
-    api.post('/chat/sessions', { project_id: projectId, title }),
+    api.post(`/projects/${projectId}/chat-sessions`, { title }),
   
-  getMessages: (chatId: string) =>
-    api.get(`/chat/${chatId}/messages`),
+  getMessages: (projectId: string, chatId: string) =>
+    api.get(`/projects/${projectId}/chat-sessions/${chatId}/messages`),
   
-  sendMessage: (chatId: string, content: string) =>
-    api.post(`/chat/${chatId}/messages`, { content }),
+  sendMessage: (projectId: string, chatId: string, content: string) =>
+    api.post(`/projects/${projectId}/chat-sessions/${chatId}/messages`, { content }),
   
-  streamMessage: (chatId: string, content: string, onData: (data: any) => void) =>
-    api.stream(`/chat/${chatId}/messages/stream?content=${encodeURIComponent(content)}`, onData),
+  streamMessage: (
+    projectId: string,
+    chatId: string,
+    query: string,
+    onData: (data: any) => void,
+    onError?: (error: any) => void
+  ) => {
+    const url = `/projects/${projectId}/chat-sessions/${chatId}/messages/stream?query=${encodeURIComponent(query)}`;
+    return api.stream(url, onData, onError);
+  },
   
-  deleteSession: (chatId: string) =>
-    api.delete(`/chat/sessions/${chatId}`),
+  deleteSession: (projectId: string, chatId: string) =>
+    api.delete(`/projects/${projectId}/chat-sessions/${chatId}`),
 };
 
 export const agentService = {

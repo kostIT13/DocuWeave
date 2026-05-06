@@ -14,8 +14,15 @@ interface Message {
   metadata: Record<string, any> | null;
 }
 
+interface SSEEvent {
+  type: 'token' | 'sources' | 'done' | 'error';
+  content?: string;
+  data?: any;
+  detail?: string;
+}
+
 const Chat = () => {
-  const { chatId } = useParams<{ chatId: string }>();
+  const { projectId, chatId } = useParams<{ projectId: string; chatId: string }>();
   const navigate = useNavigate();
   
   const [messages, setMessages] = useState<Message[]>([]);
@@ -24,9 +31,14 @@ const Chat = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [sessions, setSessions] = useState<Array<{ id: string; title: string }>>([]);
+  const [streamingResponse, setStreamingResponse] = useState('');
+  const [sources, setSources] = useState<string[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const currentProjectId = 'current-project-id'; // TODO: заменить на реальный
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  // TODO: Заменить на реальный project_id из URL/контекста
+  const currentProjectId = projectId || 'current-project-id';
 
   useEffect(() => {
     fetchSessions();
@@ -42,7 +54,16 @@ const Chat = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, streamingResponse]);
+
+  // Cleanup SSE connection on unmount
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
 
   const fetchSessions = async () => {
     try {
@@ -50,9 +71,8 @@ const Chat = () => {
       if (response.success && response.data) {
         setSessions(response.data);
         
-        // Если нет выбранного чата, но есть сессии — переходим на первую
         if (!chatId && response.data.length > 0) {
-          navigate(`/chat/${response.data[0].id}`, { replace: true });
+          navigate(`/projects/${currentProjectId}/chat/${response.data[0].id}`, { replace: true });
         }
       }
     } catch (error) {
@@ -64,7 +84,7 @@ const Chat = () => {
     if (!chatId) return;
     setIsLoading(true);
     try {
-      const response = await chatService.getMessages(chatId);
+      const response = await chatService.getMessages(currentProjectId, chatId);
       if (response.success && response.data) {
         setMessages(response.data);
       }
@@ -85,7 +105,7 @@ const Chat = () => {
     try {
       const response = await chatService.createSession(currentProjectId, 'New Chat');
       if (response.success && response.data?.id) {
-        navigate(`/chat/${response.data.id}`);
+        navigate(`/projects/${currentProjectId}/chat/${response.data.id}`);
         await fetchSessions();
         toast.success('New chat created');
       }
@@ -97,9 +117,11 @@ const Chat = () => {
     }
   };
 
+  // Найди функцию handleSend и исправь эту часть:
+
   const handleSend = async () => {
     if (!input.trim() || !chatId || isSending) return;
-    
+  
     const userMessage: Message = {
       id: `temp-${Date.now()}`,
       session_id: chatId,
@@ -108,25 +130,70 @@ const Chat = () => {
       created_at: new Date().toISOString(),
       metadata: {},
     };
-    
+  
+  // Добавляем сообщение пользователя
     setMessages(prev => [...prev, userMessage]);
+    const userQuery = input;
     setInput('');
     setIsSending(true);
-    
+    setStreamingResponse('');
+    setSources([]);
+  
     try {
-      const response = await chatService.sendMessage(chatId, input);
-      if (response.success && response.data) {
-        setMessages(prev => {
-          const filtered = prev.filter(m => m.id !== userMessage.id);
-          return [...filtered, response.data!];
-        });
-      }
+    // ✅ ИСПРАВЛЕНО: добавлен await
+      const es = await chatService.streamMessage(
+        currentProjectId,
+        chatId,
+        userQuery,
+      // onData callback
+        (event: SSEEvent) => {
+          console.log('SSE event:', event);
+        
+          if (event.type === 'token') {
+          // Добавляем токен к стриминговому ответу
+            setStreamingResponse(prev => prev + (event.content || ''));
+          } else if (event.type === 'sources') {
+          // Сохраняем источники
+            const sourceList = event.data?.docs?.map((d: any) => d.file) || [];
+            setSources(sourceList);
+          } else if (event.type === 'done') {
+          // Стриминг завершён — добавляем финальное сообщение
+            if (streamingResponse) {
+              setMessages(prev => [...prev, {
+                id: `assistant-${Date.now()}`,
+                session_id: chatId,
+                role: 'assistant',
+                content: streamingResponse,
+                created_at: new Date().toISOString(),
+                metadata: { sources }
+              }]);
+            }
+            setIsSending(false);
+            setStreamingResponse('');
+          } else if (event.type === 'error') {
+            toast.error(event.detail || 'Ошибка при получении ответа');
+            setIsSending(false);
+            setStreamingResponse('');
+          }
+        },
+      // onError callback
+        (error) => {
+          console.error('Stream error:', error);
+          toast.error('Connection error');
+          setIsSending(false);
+          setStreamingResponse('');
+        }
+      );
+    
+    // ✅ ТЕПЕРЬ es — это EventSource, а не Promise
+      eventSourceRef.current = es;
+    
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('Failed to start stream:', error);
       toast.error('Failed to send message');
-      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
-    } finally {
       setIsSending(false);
+    // Убираем временное сообщение при ошибке
+      setMessages(prev => prev.filter(m => m.id !== userMessage.id));
     }
   };
 
@@ -135,10 +202,10 @@ const Chat = () => {
     if (!window.confirm('Delete this chat session?')) return;
     
     try {
-      const response = await chatService.deleteSession(sessionId);
+      const response = await chatService.deleteSession(currentProjectId, sessionId);
       if (response.success) {
         if (sessionId === chatId) {
-          navigate('/chat');
+          navigate(`/projects/${currentProjectId}/chat`);
         }
         await fetchSessions();
         toast.success('Chat deleted');
@@ -198,7 +265,7 @@ const Chat = () => {
                   sessions.map((session) => (
                     <div
                       key={session.id}
-                      onClick={() => navigate(`/chat/${session.id}`)}
+                      onClick={() => navigate(`/projects/${currentProjectId}/chat/${session.id}`)}
                       className="px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors"
                     >
                       <div className="flex items-center justify-between">
@@ -306,7 +373,7 @@ const Chat = () => {
                 sessions.map((session) => (
                   <div
                     key={session.id}
-                    onClick={() => navigate(`/chat/${session.id}`)}
+                    onClick={() => navigate(`/projects/${currentProjectId}/chat/${session.id}`)}
                     className={`px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors ${
                       session.id === chatId ? 'bg-blue-50 border-l-4 border-blue-600' : ''
                     }`}
@@ -358,7 +425,7 @@ const Chat = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-5">
-              {messages.length === 0 ? (
+              {messages.length === 0 && !streamingResponse ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
                   <Bot className="w-16 h-16 text-gray-300 mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Start a conversation</h3>
@@ -437,7 +504,47 @@ const Chat = () => {
                       </div>
                     </div>
                   ))}
-                  {isSending && (
+                  
+                  {/* ✅ Streaming response */}
+                  {streamingResponse && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 rounded-2xl rounded-bl-md p-4 max-w-[85%]">
+                        <div className="flex items-center mb-2">
+                          <Bot className="w-4 h-4 text-blue-600 mr-2" />
+                          <span className="text-xs font-medium text-gray-500">AI Assistant</span>
+                          {isSending && (
+                            <span className="ml-2 text-xs text-blue-600 flex items-center">
+                              <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                              Thinking...
+                            </span>
+                          )}
+                        </div>
+                        <p className="whitespace-pre-wrap leading-relaxed">{streamingResponse}</p>
+                        
+                        {/* Streaming sources */}
+                        {sources.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-gray-200/50">
+                            <p className="text-xs font-medium text-gray-500 mb-1">Sources:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {sources.slice(0, 3).map((source: string, idx: number) => {
+                                const displayName = source.split('/').pop()?.substring(0, 20) || 'Source';
+                                return (
+                                  <span key={idx} className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-700">
+                                    {displayName}...
+                                  </span>
+                                );
+                              })}
+                              {sources.length > 3 && (
+                                <span className="text-xs text-gray-400">+{sources.length - 3} more</span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {isSending && !streamingResponse && (
                     <div className="flex justify-start">
                       <div className="bg-gray-100 rounded-2xl rounded-bl-md p-4 max-w-[85%]">
                         <div className="flex items-center">
@@ -480,7 +587,7 @@ const Chat = () => {
                       : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg'
                   }`}
                 >
-                  <Send className="w-5 h-5" />
+                  {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </button>
               </div>
               <p className="mt-2 text-xs text-gray-500 text-center">
