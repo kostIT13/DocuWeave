@@ -1,411 +1,544 @@
-# DocuWeave
+### 1. Общая информация о проекте
 
-![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
+#### Название проекта
+DocuWeave
 
-**DocuWeave** — это современное веб-приложение для работы с документами, использующее RAG (Retrieval-Augmented Generation) и интеллектуальных агентов на основе LangGraph. Позволяет загружать, анализировать и взаимодействовать с документами через естественный язык.
+#### Краткое описание
+DocuWeave — это современное веб-приложение для работы с документами, использующее RAG (Retrieval-Augmented Generation) и интеллектуальных агентов на основе LangGraph. Позволяет пользователям загружать, анализировать и взаимодействовать с документами через естественный язык. Проект предоставляет интерактивный чат-интерфейс, систему векторного поиска на базе ChromaDB и интеграцию с локальными LLM-моделями через Ollama. Архитектура включает модульную RAG-систему, агентную систему с инструментами и полный API-интерфейс для управления проектами, документами и чат-сессиями.
 
-## ✨ Ключевые возможности
+#### Глоссарий
 
-- **📄 Умная обработка документов**: Поддержка PDF, DOCX, TXT с автоматическим извлечением текста и чанкированием
-- **🤖 Интеллектуальный агент**: Агент на LangGraph с инструментами для анализа, суммаризации и ответов на вопросы
-- **🔍 Векторный поиск**: Интеграция с ChromaDB для семантического поиска по документам
-- **💬 Интерактивный чат**: Чат-интерфейс с потоковыми ответами и историей диалогов
-- **🚀 Готовое развертывание**: Полная Docker Compose конфигурация для быстрого запуска
-- **🔐 Безопасность**: JWT аутентификация, ролевая модель, защита данных
+| Название | Описание |
+|--------|---------|
+| Документ | Файл, загруженный пользователем для анализа (PDF, DOCX, TXT и др.). Содержит текст, метаданные и статус обработки. |
+| Проект | Контейнер для документов, чатов и настроек. Пользователь может создавать несколько проектов для организации работы. |
+| Чат-сессия | Диалог между пользователем и AI-агентом. Содержит историю сообщений и связана с проектом. |
+| Агент | Интеллектуальный помощник, способный анализировать документы, отвечать на вопросы и выполнять задачи с помощью инструментов. |
+| RAG (Retrieval-Augmented Generation) | Технология, сочетающая семантический поиск по документам с генерацией ответов на основе найденного контекста. |
+| Инструмент агента | Функция, которую может использовать агент для выполнения специфических задач (поиск, суммаризация, анализ и т.д.). |
+| Векторный поиск | Поиск документов по смыслу, а не по ключевым словам, с использованием эмбеддингов и векторной базы данных. |
+| Эмбеддинг | Векторное представление текста, позволяющее сравнивать и искать схожие по смыслу фрагменты. |
+| Чанкирование | Процесс разбиения документа на небольшие фрагменты (чанки) для более эффективного поиска и анализа. |
+| Проектные настройки | Конфигурация, определяющая поведение RAG-системы и агента в рамках проекта (модели, температура, размер чанков и т.д.). |
 
-## 🏗️ Архитектура
 
-### Высокоуровневая схема
+### 2. Зависимости и технологический стек
+
+#### Используемые языки программирования
+- Python (3.12+)
+- TypeScript
+
+#### Используемые библиотеки и фреймворки
+
+**Веб-фреймворки**
+- FastAPI (0.136.0) — современный фреймворк для создания API на Python
+- React (19.2.5) — библиотека для построения пользовательских интерфейсов
+
+**ORM и базы данных**
+- SQLAlchemy (2.0.49) — ORM для работы с PostgreSQL
+- asyncpg (0.31.0) — асинхронный драйвер PostgreSQL
+- ChromaDB (1.5.8) — векторная база данных для хранения эмбеддингов
+
+**Машинное обучение и LLM**
+- LangChain (1.2.15) — фреймворк для построения приложений с LLM
+- LangGraph (1.1.9) — фреймворк для создания графов агентов
+- Ollama (0.6.1) — клиент для взаимодействия с локальными LLM-моделями
+- langchain-text-splitters (1.1.2) — инструменты для разбиения текста на чанки
+
+**Валидация и сериализация**
+- Pydantic (2.13.3) — валидация данных и сериализация
+- Pydantic[email] — расширение Pydantic с поддержкой email-валидации
+
+**Обработка документов**
+- pypdf (6.10.2) — извлечение текста из PDF
+- docx2txt (0.9) — извлечение текста из DOCX
+- unstructured (0.22.26) — универсальный парсер документов
+
+**Аутентификация**
+- python-jose (3.5.0) — работа с JWT-токенами
+- bcrypt — хеширование паролей
+
+**Утилиты и вспомогательные библиотеки**
+- alembic (1.18.4) — миграции базы данных
+- python-multipart (0.0.27) — обработка multipart-форм (загрузка файлов)
+- httpx (0.28.1) — асинхронный HTTP-клиент
+- uv (современный менеджер пакетов Python)
+
+**Фронтенд-библиотеки**
+- Tailwind CSS — utility-first CSS-фреймворк
+- Vite — сборщик и сервер разработки
+- React Router DOM — маршрутизация
+- React Query — управление серверным состоянием
+- Zustand — управление клиентским состоянием
+- Axios — HTTP-клиент
+- Lucide React — иконки
+- Framer Motion — анимации
+- React Hot Toast — уведомления
+
+#### Используемые прочие технологии
+- **Базы данных**: PostgreSQL (15-alpine) — реляционная база данных для хранения метаданных
+- **Векторные базы данных**: ChromaDB — для хранения и поиска эмбеддингов документов
+- **LLM-сервисы**: Ollama — для запуска и управления локальными LLM-моделями (qwen2.5:7b, nomic-embed-text)
+- **Контейнеризация**: Docker и Docker Compose — для оркестрации сервисов
+- **Системы сборки**: Vite (фронтенд), uv (бэкенд)
+- **CI/CD**: Не указано в проекте
+- **Внешние API**: Ollama API (локальный), ChromaDB API (локальный)
+- **Средства мониторинга**: Логирование через Python logging, health checks в Docker Compose
+- **Системы кэширования**: Не используется явно, но ChromaDB кэширует эмбеддинги
+- **Очереди сообщений**: Не используется
+- **CDN**: Не используется
+
+
+### 3. Архитектура
+
+#### Физическая структура директорий
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │    Backend      │    │   Базы данных   │
-│   (React)       │◄──►│   (FastAPI)     │◄──►│   PostgreSQL    │
-│   TypeScript    │    │   Python        │    │   ChromaDB      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Пользователь  │    │   AI Сервисы    │    │   Хранилище     │
-│   Интерфейс     │    │   Ollama        │    │   Документов    │
-└─────────────────┘    │   LangChain     │    └─────────────────┘
-                       │   LangGraph     │
-                       └─────────────────┘
+/tmp/tmp80cxrx7m/DocuWeave-master
+├── backend
+│   ├── alembic                 # Миграции базы данных
+│   ├── scripts                 # Скрипты инициализации
+│   ├── src
+│   │   ├── api                 # Эндпоинты API
+│   │   ├── infrastructure      # Инфраструктурный слой (модели, БД, конфигурация)
+│   │   ├── prompts             # Промпты для LLM
+│   │   ├── services            # Бизнес-логика (сервисы, репозитории)
+│   │   └── lifespan.py         # Жизненный цикл приложения
+│   ├── Dockerfile              # Docker-образ бэкенда
+│   └── pyproject.toml          # Зависимости и конфигурация
+├── frontend
+│   ├── public                  # Публичные статические файлы
+│   ├── src
+│   │   ├── components          # UI-компоненты
+│   │   ├── hooks               # Кастомные React-хуки
+│   │   ├── layouts             # Макеты страниц
+│   │   ├── pages               # Страницы приложения
+│   │   ├── services            # Сервисы API
+│   │   ├── types               # TypeScript-типы
+│   │   └── App.tsx             # Точка входа
+│   ├── Dockerfile              # Docker-образ фронтенда
+│   └── package.json            # Зависимости фронтенда
+├── docker-compose.yml          # Оркестрация сервисов
+└── .env.example                # Шаблон переменных окружения
 ```
 
-### Модули системы
-1. **RAG система**: Модульная архитектура с разделением на Indexer, Retriever, Generator, Orchestrator
-2. **Агентная система**: Интеллектуальный агент на LangGraph с инструментами для анализа документов
-3. **API слой**: RESTful API с эндпоинтами для документов, чатов, проектов и агента
-4. **Инфраструктура**: Docker, PostgreSQL, ChromaDB, Ollama
+#### Логическая архитектура
+Архитектура проекта представляет собой **модульный монолит** с элементами **чистой архитектуры** и **event-driven** подхода. Основные слои:
+- **Presentation**: FastAPI роутеры и React-компоненты
+- **Application**: Сервисы, orchestrators, графы агентов
+- **Domain**: Сущности (User, Project, Document), бизнес-правила
+- **Infrastructure**: Репозитории, базы данных, внешние API
 
-### Ключевые компоненты
-- **UnifiedOllamaClient**: Единый клиент для работы с моделями Ollama
-- **AgentOrchestrator**: Координатор работы агента с интеграцией RAG
-- **RAGOrchestrator**: Управление полным RAG пайплайном
-- **DocumentProcessor**: Обработка и чанкирование документов
-
-## 🚀 Быстрый старт
-
-### Предварительные требования
-- Docker и Docker Compose
-- 16+ GB RAM (рекомендуется для работы моделей Ollama)
-- Git
-
-### Установка и запуск за 5 минут
-
-```bash
-# 1. Клонирование репозитория
-git clone <repository-url>
-cd DocuWeave
-
-# 2. Настройка переменных окружения
-cp .env.example .env
-# Отредактируйте .env при необходимости
-
-# 3. Запуск всех сервисов
-docker-compose up -d
-
-# 4. Проверка работоспособности
-docker-compose ps
-```
-
-### Проверка работоспособности
-После запуска откройте в браузере:
-
-- **📚 Backend API документация**: http://localhost:8000/docs (Swagger UI)
-- **🎨 Frontend приложение**: http://localhost:5173
-- **🔍 ChromaDB UI**: http://localhost:8001
-- **🤖 Ollama API**: http://localhost:11434
-
-### Инициализация базы данных
-```bash
-# Миграции выполняются автоматически при первом запуске
-# Для ручного запуска:
-docker-compose run migrations
-```
-
-## 📚 Подробная документация
-
-- **[Backend документация](./backend/README.md)** - Подробное описание API, архитектуры и разработки бэкенда
-- **[Frontend документация](./frontend/README.md)** - Руководство по фронтенду, компонентам и UI
-- **[Docker Compose](./docker-compose.yml)** - Конфигурация всех сервисов
-- **[Переменные окружения](./.env.example)** - Шаблон для настройки окружения
-
-## 🐳 Сервисы Docker Compose
-
-| Сервис | Порт | Назначение | Особенности |
-|--------|------|------------|-------------|
-| **backend** | 8000 | FastAPI приложение | Автоматическая перезагрузка, health checks |
-| **frontend** | 5173 | React приложение | Hot reload, оптимизированная сборка |
-| **db** | 5432 | PostgreSQL | Персистентное хранилище, health checks |
-| **chromadb** | 8001 | ChromaDB | Векторная база для эмбеддингов |
-| **ollama** | 11434 | Ollama LLM | Локальные LLM модели |
-| **migrations** | - | Alembic миграции | Автоматическое применение миграций |
-
-## 📡 API Эндпоинты
-
-### Агент
-- `POST /agent/query` - Обработка запроса через интеллектуального агента
-- `POST /agent/query/rag-fallback` - Обработка с fallback на RAG
-- `POST /agent/analyze-document` - Анализ документа инструментами агента
-- `POST /agent/batch-process` - Пакетная обработка запросов
-- `GET /agent/info` - Информация о конфигурации агента
-- `GET /agent/health` - Проверка здоровья агента
-
-### Документы
-- `POST /documents/upload` - Загрузка документа (PDF, DOCX, TXT)
-- `DELETE /documents/{document_id}` - Удаление документа
-- `GET /documents` - Список документов проекта
-- `GET /documents/{document_id}` - Получение метаданных документа
-
-### Чат
-- `POST /chat/sessions` - Создание сессии чата
-- `GET /chat/sessions` - Список сессий пользователя
-- `POST /chat/{chat_id}/messages` - Отправка сообщения
-- `GET /chat/{chat_id}/messages/stream` - Потоковое получение ответа
-- `GET /chat/{chat_id}/messages` - История сообщений
-
-### Проекты
-- `GET /projects` - Список проектов пользователя
-- `POST /projects` - Создание проекта
-- `PATCH /projects/{project_id}` - Обновление настроек проекта
-- `DELETE /projects/{project_id}` - Удаление проекта
-
-### Аутентификация
-- `POST /auth/register` - Регистрация пользователя
-- `POST /auth/login` - Вход и получение JWT токена
-- `POST /auth/refresh` - Обновление токена
-- `GET /auth/me` - Информация о текущем пользователе
-
-## 🤖 Агентная система
-
-### Архитектура агента
-Агент построен на **LangGraph** и состоит из следующих узлов:
+Используются следующие паттерны:
+- **Repository Pattern** — абстракция доступа к данным
+- **Dependency Injection** — внедрение зависимостей через FastAPI Depends
+- **Factory Pattern** — создание компонентов RAG-системы
+- **State Pattern** — управление состоянием агента через LangGraph
+- **Strategy Pattern** — выбор инструментов агента
 
 ```mermaid
+graph TD
+    subgraph Presentation
+        Router[FastAPI Router]
+        Frontend[React Frontend]
+    end
+    subgraph Application
+        AgentOrchestrator[AgentOrchestrator]
+        RAGOrchestrator[RAGOrchestrator]
+        UoW[UnitOfWork]
+    end
+    subgraph Domain
+        Entity[Domain Entities]
+        RepoInterface[Repository Interface]
+    end
+    subgraph Infrastructure
+        SQLRepo[SQLAlchemy Repository]
+        Chroma[ChromaDB Client]
+        Ollama[Ollama Client]
+        GoogleAPI[Google Calendar Client]
+    end
+    Router --> AgentOrchestrator
+    Router --> RAGOrchestrator
+    AgentOrchestrator --> UoW
+    AgentOrchestrator --> RepoInterface
+    RAGOrchestrator --> Chroma
+    RAGOrchestrator --> Ollama
+    SQLRepo -- implements --> RepoInterface
+    Frontend --> Router
+```
+
+#### Диаграмма верхнеуровневой архитектуры
+```mermaid
 graph LR
-    A[Входной запрос] --> B[classify_query]
-    B --> C{Тип запроса}
-    C -->|Поиск| D[rag_search]
-    C -->|Анализ| E[document_analysis]
-    C -->|Суммаризация| F[summarize]
-    D --> G[call_tools]
-    E --> G
-    F --> G
-    G --> H[generate_response]
-    H --> I[finalize]
-    I --> J[Ответ пользователю]
+    Client[Клиент] -->|HTTP| Nginx[Nginx :80]
+    Nginx -->|HTTP| Frontend[React Frontend :5173]
+    Frontend -->|HTTP| Backend[FastAPI :8000]
+    Backend -->|TCP| PostgreSQL[(PostgreSQL)]
+    Backend -->|HTTP| ChromaDB[(ChromaDB :8000)]
+    Backend -->|HTTP| Ollama[(Ollama :11434)]
+    Backend -->|SMTP| SMTP[SMTP server]
+    Backend -->|HTTP| ExternalAPI[External APIs]
+    Worker[Background Worker] -->|Process| Documents[Document Processing]
+    Documents --> Backend
+    Documents --> ChromaDB
+    Documents --> Ollama
 ```
 
-### Инструменты агента
-1. **rag_search** - Поиск релевантных документов в векторной базе
-2. **document_analysis** - Анализ документа (суммаризация, ключевые точки и т.д.)
-3. **summarize** - Суммаризация текста
-4. **extract_entities** - Извлечение сущностей из текста
-5. **answer_with_context** - Ответ на вопрос на основе контекста
-6. **classify_query** - Классификация запроса пользователя
-
-### Пример использования агента
-```python
-# Пример запроса к агенту через API
-import requests
-
-response = requests.post(
-    "http://localhost:8000/agent/query",
-    json={
-        "query": "Какие основные выводы из отчета по продажам?",
-        "project_id": "project_123",
-        "stream": False
-    },
-    headers={"Authorization": "Bearer <token>"}
-)
-
-print(response.json())
+#### Диаграмма внутренних компонентов
+```mermaid
+graph TD
+    subgraph Backend
+        API[API Layer]
+        Services[Application Services]
+        Repositories[Repositories]
+        Models[Domain Models]
+        Infrastructure[Infrastructure]
+    end
+    
+    API --> Services
+    Services --> Repositories
+    Repositories --> Models
+    Services --> Infrastructure
+    
+    API --> AuthEndpoints[auth.endpoints]
+    API --> DocumentEndpoints[document.endpoints]
+    API --> ChatEndpoints[chat.endpoints]
+    API --> AgentEndpoints[agent.endpoints]
+    API --> ProjectEndpoints[project.endpoints]
+    
+    Services --> AgentOrchestrator[AgentOrchestrator]
+    Services --> RAGOrchestrator[RAGOrchestrator]
+    Services --> ChatService[ChatSessionService]
+    Services --> DocumentService[DocumentService]
+    Services --> ProjectService[ProjectService]
+    Services --> UserService[UserService]
+    
+    Repositories --> SQLRepository[SQLAlchemyRepository]
+    
+    Infrastructure --> Database[Database]
+    Infrastructure --> OllamaClient[OllamaClient]
+    Infrastructure --> ChromaClient[ChromaClient]
+    Infrastructure --> LLMService[LLMService]
+    Infrastructure --> DocumentProcessor[DocumentProcessor]
+    
+    AgentOrchestrator --> AgentGraph[AgentGraph]
+    AgentOrchestrator --> AgentTools[AgentTools]
+    RAGOrchestrator --> RAGIndexer[RAGIndexer]
+    RAGOrchestrator --> RAGRetriever[RAGRetriever]
+    RAGOrchestrator --> RAGGenerator[RAGGenerator]
 ```
 
-## 🔧 Конфигурация
+#### Диаграммы последовательности
 
-### Переменные окружения (.env)
-```bash
-# База данных
-POSTGRES_DB=Mydatabase123
-POSTGRES_HOST=db
-POSTGRES_PASSWORD=Mypass123
-POSTGRES_USER=Myuser123
-
-# Ollama
-OLLAMA_HOST=http://ollama:11434
-OLLAMA_EMBEDDING_MODEL=nomic-embed-text
-OLLAMA_LLM_MODEL=qwen2.5:7b
-
-# ChromaDB
-CHROMA_HOST=chromadb
-CHROMA_PORT=8000
-
-# Агент
-AGENT_ENABLED=true
-AGENT_MAX_STEPS=10
-
-# JWT
-JWT_SECRET_KEY=your-secret-key-change-in-production
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# Логирование
-LOG_LEVEL=INFO
+**Обработка запроса к агенту**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant AgentOrchestrator
+    participant AgentGraph
+    participant RAGRetriever
+    participant LLMService
+    Client->>API: POST /agent/query
+    API->>AgentOrchestrator: process_query()
+    AgentOrchestrator->>AgentGraph: run()
+    AgentGraph->>AgentGraph: classify_query()
+    AgentGraph->>RAGRetriever: retrieve()
+    RAGRetriever->>ChromaDB: Поиск по эмбеддингам
+    ChromaDB-->>RAGRetriever: Контекст
+    RAGRetriever-->>AgentGraph: Контекст
+    AgentGraph->>LLMService: generate()
+    LLMService->>Ollama: Генерация ответа
+    Ollama-->>LLMService: Ответ
+    LLMService-->>AgentGraph: Ответ
+    AgentGraph-->>AgentOrchestrator: Результат
+    AgentOrchestrator-->>API: Результат
+    API-->>Client: 200 OK
 ```
 
-### Настройка моделей Ollama
-По умолчанию используются:
-- **Модель эмбеддингов**: `nomic-embed-text` (1536 размерность)
-- **LLM модель**: `qwen2.5:7b` (7 миллиардов параметров)
-
-Для изменения моделей:
-1. Отредактируйте `OLLAMA_EMBEDDING_MODEL` и `OLLAMA_LLM_MODEL` в `.env`
-2. Перезапустите сервис Ollama: `docker-compose restart ollama`
-3. Убедитесь, что модель загружена: `docker-compose exec ollama ollama pull <model-name>`
-
-## 🧪 Примеры использования
-
-### Загрузка документа
-```bash
-curl -X POST "http://localhost:8000/documents/upload" \
-  -H "Authorization: Bearer <token>" \
-  -F "file=@/path/to/document.pdf" \
-  -F "project_id=project_123"
+**Загрузка документа**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant DocumentService
+    participant DocumentRepository
+    participant RAGIndexer
+    participant ChromaDB
+    Client->>API: POST /documents/upload
+    API->>DocumentService: upload_document()
+    DocumentService->>DocumentRepository: create()
+    DocumentRepository->>PostgreSQL: INSERT
+    PostgreSQL-->>DocumentRepository: ID
+    DocumentRepository-->>DocumentService: Document
+    DocumentService->>BackgroundTask: _index_document_safe()
+    BackgroundTask->>RAGIndexer: index_document()
+    RAGIndexer->>DocumentProcessor: load_and_split()
+    DocumentProcessor->>PyPDFLoader: Загрузка PDF
+    PyPDFLoader-->>DocumentProcessor: Текст
+    DocumentProcessor-->>RAGIndexer: Чанки
+    RAGIndexer->>Ollama: embed()
+    Ollama-->>RAGIndexer: Эмбеддинги
+    RAGIndexer->>ChromaDB: add_documents()
+    ChromaDB-->>RAGIndexer: Успех
+    RAGIndexer->>DocumentRepository: update()
+    DocumentRepository->>PostgreSQL: UPDATE
+    PostgreSQL-->>DocumentRepository: Успех
 ```
 
-### Взаимодействие с агентом
-```bash
-curl -X POST "http://localhost:8000/agent/query" \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "Обобщите основные идеи из загруженных документов",
-    "project_id": "project_123"
-  }'
+**Потоковый чат**
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant RAGOrchestrator
+    participant RAGRetriever
+    participant RAGGenerator
+    Client->>API: GET /chat/{id}/messages/stream
+    API->>RAGOrchestrator: rag_pipeline_stream()
+    RAGOrchestrator->>RAGRetriever: retrieve()
+    RAGRetriever->>ChromaDB: Поиск
+    ChromaDB-->>RAGRetriever: Контекст
+    RAGRetriever-->>RAGOrchestrator: Контекст
+    RAGOrchestrator->>RAGGenerator: generate_response_stream()
+    RAGGenerator->>Ollama: stream chat
+    Ollama-->>RAGGenerator: Токены
+    RAGGenerator-->>RAGOrchestrator: Токены
+    RAGOrchestrator-->>API: SSE события
+    API-->>Client: text/event-stream
 ```
 
-### Создание чат-сессии
-```bash
-curl -X POST "http://localhost:8000/chat/sessions" \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "project_id": "project_123",
-    "title": "Обсуждение отчетов"
-  }'
+#### Схема базы данных
+```mermaid
+erDiagram
+    users {
+        string id PK
+        string email
+        string username
+        string hashed_password
+        datetime created_at
+        datetime updated_at
+        boolean is_active
+        boolean is_superuser
+    }
+    projects {
+        string id PK
+        string user_id FK
+        string name
+        string description
+        datetime created_at
+        datetime updated_at
+        jsonb settings
+    }
+    documents {
+        string id PK
+        string project_id FK
+        string filename
+        string file_path
+        int file_size
+        string file_type
+        string mime_type
+        string status
+        string content_hash
+        string error_message
+        int chunk_count
+        jsonb metadata_
+        boolean is_deleted
+        string collection_name
+        datetime deleted_at
+        datetime created_at
+        datetime updated_at
+        datetime processed_at
+    }
+    sessions {
+        string id PK
+        string project_id FK
+        string user_id FK
+        string title
+        datetime created_at
+        datetime updated_at
+    }
+    messages {
+        string id PK
+        string session_id FK
+        string role
+        string content
+        jsonb metadata_
+        datetime created_at
+        datetime updated_at
+    }
+    traces {
+        string id PK
+        string session_id FK
+        string step_name
+        jsonb input
+        jsonb output
+        jsonb state_snapshot
+        datetime created_at
+        datetime updated_at
+    }
+    project_settings_history {
+        string id PK
+        string project_id FK
+        string user_id FK
+        jsonb old_settings
+        jsonb new_settings
+        jsonb changed_fields
+        datetime created_at
+    }
+    users ||--o{ projects : owns
+    projects ||--o{ documents : contains
+    projects ||--o{ sessions : contains
+    projects ||--o{ project_settings_history : has
+    sessions ||--o{ messages : contains
+    sessions ||--o{ traces : contains
+    users ||--o{ sessions : owns
+    users ||--o{ project_settings_history : modified_by
 ```
 
-## 🛠️ Разработка
 
-### Локальная разработка backend
-```bash
-cd backend
-uv sync  # Установка зависимостей
-cp .env.example .env  # Настройка окружения
-alembic upgrade head  # Применение миграций
-uvicorn src.main:app --reload  # Запуск сервера
-```
+### 4. Основные обработчики в системе
 
-### Локальная разработка frontend
-```bash
-cd frontend
-npm install  # Установка зависимостей
-cp .env.example .env.local  # Настройка окружения
-npm run dev  # Запуск сервера разработки
-```
+#### CLI-утилиты (консольные команды)
+| Команда | Назначение |
+|--------|---------|
+| `uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload` | Запуск FastAPI-сервера в режиме разработки с авто-перезагрузкой |
+| `alembic upgrade head` | Применение всех миграций базы данных |
+| `alembic revision --autogenerate -m "описание"` | Создание новой миграции на основе изменений в моделях |
+| `docker-compose up -d` | Запуск всех сервисов проекта в фоновом режиме |
+| `./scripts/make-migration.sh "описание"` | Создание миграции Alembic через Docker |
+| `docker-compose run --rm migrations alembic downgrade -1` | Откат последней миграции базы данных |
 
-### Тестирование
-```bash
-# Backend тесты
-cd backend
-pytest tests/
-
-# Frontend тесты
-cd frontend
-npm test
-```
-
-### Работа с миграциями базы данных
-```bash
-# Создание миграции
-docker-compose run --rm migrations alembic revision --autogenerate -m "описание изменений"
-
-# Применение миграций
-docker-compose up migrations
-
-# Откат последней миграции
-docker-compose run --rm migrations alembic downgrade -1
-
-# Просмотр истории
-docker-compose run --rm migrations alembic history
-```
-
-## 📊 Мониторинг и логи
-
-### Логирование
-- **Backend**: Логи в stdout с уровнем `LOG_LEVEL` из .env
-- **Ollama**: Логи доступны через `docker-compose logs ollama`
-- **Базы данных**: Логи доступны через соответствующие контейнеры
-
-### Health checks
-- **Backend**: `GET /health`
-- **Agent**: `GET /agent/health`
-- **ChromaDB**: Автоматическая проверка в docker-compose
-- **PostgreSQL**: Автоматическая проверка в docker-compose
-
-### Трассировка агента
-Каждый вызов агента записывается в `GraphTrace` с:
-- Входными параметрами
-- Выполненными шагами
-- Использованными инструментами
-- Финальным ответом
-- Временными метками
-
-## 🚨 Устранение неполадок
-
-### Проблемы с памятью
-Если Ollama не хватает памяти:
-1. Увеличьте лимиты памяти в `docker-compose.yml` (раздел `deploy.resources`)
-2. Используйте меньшие модели (например, `llama3.2:3b` вместо `qwen2.5:7b`)
-3. Уменьшите `chunk_size` в настройках RAG
-
-### Проблемы с загрузкой моделей
-Если модели не загружаются:
-1. Проверьте доступность Ollama: `curl http://localhost:11434/api/tags`
-2. Загрузите модели вручную: `docker-compose exec ollama ollama pull qwen2.5:7b`
-3. Проверьте логи: `docker-compose logs ollama`
-
-### Проблемы с подключением к базам данных
-1. Проверьте, что все сервисы запущены: `docker-compose ps`
-2. Проверьте логи миграций: `docker-compose logs migrations`
-3. Убедитесь, что переменные окружения корректны
-
-### Частые ошибки и решения
-| Ошибка | Причина | Решение |
+#### API-эндпоинты (HTTP)
+| Метод и полный путь | Назначение | Схемы |
 |--------|---------|---------|
-| `Connection refused to db:5432` | PostgreSQL не запущен | `docker-compose up -d db` |
-| `Model not found` | Модель не загружена в Ollama | `docker-compose exec ollama ollama pull <model>` |
-| `JWT token expired` | Токен истек | Обновите токен через `/auth/refresh` |
-| `Document processing failed` | Неподдерживаемый формат | Проверьте формат файла (PDF, DOCX, TXT) |
+| POST /auth/register | Регистрация нового пользователя | UserRegister, TokenWithUser |
+| POST /auth/login | Аутентификация и получение JWT токена | UserLogin, TokenWithUser |
+| GET /auth/me | Получение информации о текущем пользователе | UserResponse |
+| POST /projects | Создание нового проекта | ProjectCreate, ProjectResponse |
+| GET /projects | Получение списка проектов пользователя | ProjectResponse[] |
+| PATCH /projects/{project_id} | Обновление проекта | ProjectUpdate, ProjectResponse |
+| DELETE /projects/{project_id} | Удаление проекта | - |
+| GET /projects/{project_id}/settings | Получение настроек проекта | ProjectSettings |
+| PATCH /projects/{project_id}/settings | Обновление настроек проекта | ProjectSettingsUpdate, ProjectSettings |
+| GET /projects/{project_id}/settings/history | Получение истории изменений настроек | HistoryPagination |
+| POST /projects/{project_id}/documents/upload | Загрузка документа в проект | DocumentUploadResponse |
+| GET /projects/{project_id}/documents | Получение списка документов проекта | DocumentListResponse[] |
+| GET /projects/{project_id}/documents/{document_id} | Получение метаданных документа | DocumentResponse |
+| DELETE /projects/{project_id}/documents/{document_id} | Удаление документа | - |
+| POST /projects/{project_id}/chat-sessions | Создание новой чат-сессии | ChatSessionCreate, ChatSessionResponse |
+| GET /projects/{project_id}/chat-sessions | Получение списка чат-сессий | ChatSessionResponse[] |
+| GET /projects/{project_id}/chat-sessions/{chat_id} | Получение информации о чат-сессии | ChatSessionResponse |
+| PATCH /projects/{project_id}/chat-sessions/{chat_id} | Обновление чат-сессии | ChatSessionUpdate, ChatSessionResponse |
+| DELETE /projects/{project_id}/chat-sessions/{chat_id} | Удаление чат-сессии | - |
+| POST /projects/{project_id}/chat-sessions/{chat_id}/messages | Отправка сообщения в чат | MessageCreate, MessageResponse |
+| GET /projects/{project_id}/chat-sessions/{chat_id}/messages | Получение истории сообщений | MessageResponse[] |
+| GET /projects/{project_id}/chat-sessions/{chat_id}/messages/stream | Потоковое получение ответа от агента | - |
+| POST /agent/query | Обработка запроса через интеллектуального агента | AgentQueryRequest, AgentResponse |
+| POST /agent/query/rag-fallback | Обработка с fallback на RAG | AgentQueryRequest, AgentResponse |
+| POST /agent/analyze-document | Анализ документа инструментами агента | DocumentAnalysisRequest, DocumentAnalysisResponse |
+| POST /agent/batch-process | Пакетная обработка запросов | BatchQueryRequest, BatchQueryResponse |
+| GET /agent/info | Получение информации о конфигурации агента | AgentInfoResponse |
+| GET /agent/health | Проверка здоровья агента | - |
 
-## 📈 Дорожная карта
+#### Слушатели событий из очередей / брокеров сообщений
+Проект не использует брокеры сообщений (Kafka, RabbitMQ, Redis Streams и т.д.). Вместо этого используется механизм фоновых задач через `BackgroundTasks` в FastAPI для асинхронной обработки документов.
 
-### Планируемые функции
-- [ ] Поддержка большего количества форматов документов (PPTX, XLSX)
-- [ ] Мультиязычность интерфейса и обработки
-- [ ] Расширенная аналитика использования
-- [ ] Интеграция с облачными хранилищами (Google Drive, Dropbox)
-- [ ] API для сторонних интеграций
-- [ ] Расширенная система плагинов для агента
-- [ ] Мобильное приложение
+#### Отложенные и фоновые задачи (с cron, Celery, ARQ, RQ, APScheduler, Hangfire, и т.д.)
+| Имя задачи | Назначение | Тип |
+|--------|---------|---------|
+| _index_document_safe | Асинхронная индексация загруженного документа в векторную базу данных | Фоновая задача (BackgroundTask) |
+| retry_indexing | Повторная попытка индексации документа, завершившегося с ошибкой | Фоновая задача (BackgroundTask) |
+| delete_document | Асинхронное удаление документа из системы (файл, индекс, БД) | Фоновая задача (BackgroundTask) |
+| batch_process_queries | Пакетная обработка нескольких запросов к агенту | Периодическая (вызывается по запросу) |
 
-### Улучшения производительности
-- [ ] Кэширование эмбеддингов
-- [ ] Пакетная обработка документов
-- [ ] Оптимизация запросов к векторной базе
-- [ ] Поддержка GPU для инференса
 
-## 🤝 Вклад в проект
+### 5. Конфигурация
+Проект использует систему конфигурации на основе переменных окружения и Pydantic Settings. Основные аспекты:
 
-Мы приветствуем вклад в развитие DocuWeave! Пожалуйста, ознакомьтесь с [руководством по вкладу](CONTRIBUTING.md) перед началом.
+**Источники конфигурации:**
+- Файл `.env` в корне проекта (указывается в docker-compose.yml)
+- Переменные окружения системы
+- Значения по умолчанию в коде
 
-### Процесс разработки
-1. Создайте issue с описанием задачи
-2. Создайте feature branch
-3. Реализуйте изменения
-4. Напишите тесты
-5. Создайте pull request
-6. Пройдите code review
+**Основные переменные окружения:**
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` — параметры подключения к PostgreSQL
+- `DATABASE_URL` — полный URL для подключения к БД (формируется из предыдущих)
+- `OLLAMA_HOST` — адрес сервера Ollama (по умолчанию http://ollama:11434)
+- `OLLAMA_EMBEDDING_MODEL` — модель для генерации эмбеддингов (по умолчанию nomic-embed-text)
+- `OLLAMA_LLM_MODEL` — модель для генерации текста (по умолчанию qwen2.5:7b)
+- `CHROMA_HOST`, `CHROMA_PORT` — параметры подключения к ChromaDB
+- `JWT_SECRET_KEY` — секретный ключ для подписи JWT-токенов
+- `JWT_ALGORITHM` — алгоритм шифрования JWT (по умолчанию HS256)
+- `ACCESS_TOKEN_EXPIRE_MINUTES` — время жизни access-токена в минутах
+- `LOG_LEVEL` — уровень логирования (по умолчанию INFO)
 
-### Стиль кода
-- **Backend**: PEP 8, type hints, docstrings
-- **Frontend**: ESLint, Prettier, TypeScript strict mode
-- **Коммиты**: Conventional Commits
-- **Тесты**: Покрытие ключевой функциональности
+**Механизм загрузки:**
+Конфигурация загружается через `pydantic-settings` в `src/infrastructure/core/config.py`. Используется декоратор `@lru_cache` для кэширования настроек. Файл `.env` ищется в корне проекта.
 
-## 📚 Полезные ссылки
+**Валидация:**
+Все переменные проходят валидацию через Pydantic. Например, проверяется наличие `DATABASE_URL`, корректность формата email при регистрации. При ошибках валидации выбрасываются исключения.
 
-- [FastAPI документация](https://fastapi.tiangolo.com/)
-- [React документация](https://react.dev/)
-- [LangChain документация](https://python.langchain.com/)
-- [LangGraph документация](https://langchain-ai.github.io/langgraph/)
-- [Ollama документация](https://ollama.ai/)
-- [ChromaDB документация](https://docs.trychroma.com/)
-- [Docker документация](https://docs.docker.com/)
+**Поддержка окружений:**
+Проект поддерживает разные окружения через переменную `ENVIRONMENT` (development, staging, production). В production-режиме ChromaDB использует локальное хранилище, в development — подключение по HTTP.
 
-## 📄 Лицензия
+**Расположение:**
+- Основные настройки: `backend/src/infrastructure/core/config.py`
+- Шаблон переменных: `.env.example`
+- Конфигурация логирования: `backend/src/infrastructure/core/logging_settings.py`
 
-Проект распространяется под лицензией MIT. Подробнее см. в файле [LICENSE](LICENSE).
 
----
+### 6. Мониторинг
+Проект реализует базовую систему мониторинга, включающую логирование, метрики и трейсинг.
 
-**Примечание**: Этот README обновляется по мере развития проекта. Для получения самой актуальной информации обратитесь к документации в соответствующих директориях или создайте issue.
+**Логирование:**
+- Используется стандартная библиотека `logging` Python
+- Настройки в `backend/src/infrastructure/core/logging_settings.py`
+- Поддержка нескольких уровней: DEBUG, INFO, WARNING, ERROR
+- Формат: `%(asctime)s | %(name)s | %(levelname)-8s | %(message)s`
+- Вывод: в stdout (для Docker) и в файл (опционально)
+- Фильтрация: скрытие verbose-логов от SQLAlchemy, asyncpg, httpx
+- Используется в сервисах для отслеживания операций (загрузка документа, обработка запроса и т.д.)
+
+**Метрики:**
+- Встроенные метрики в бизнес-логике:
+  - Время обработки запроса агентом (`processing_time`)
+  - Количество шагов обработки (`steps`)
+  - Количество обработанных документов (`chunk_count`)
+  - Статус зависимостей (Ollama, ChromaDB, PostgreSQL)
+- Метрики доступны через health check эндпоинты
+- Не используется специализированный сборщик метрик (Prometheus, StatsD)
+
+**Распределённый трейсинг:**
+- Трейсинг операций агента реализован через сущность `GraphTrace`
+- Каждый вызов агента записывается в БД с:
+  - Входными параметрами
+  - Выполненными шагами
+  - Использованными инструментами
+  - Финальным ответом
+  - Временными метками
+- Используется для отладки и анализа работы агента
+- Не используется специализированный трейсинг (Jaeger, OpenTelemetry)
+
+
+### 7. Тестирование
+Тесты отсутствуют в предоставленной структуре проекта. В README.md упоминается команда `pytest tests/`, но директория `tests` не включена в дерево проекта. Аналогично, в `frontend` упоминается `npm test`, но соответствующие файлы тестов не представлены.
+
+**Предполагаемая структура тестов (на основе README):**
+- Backend: `pytest` с покрытием через `pytest-cov`
+- Frontend: `vitest` с `@testing-library/react`
+
+**Запуск тестов:**
+- Backend: `cd backend && pytest tests/`
+- Frontend: `cd frontend && npm test`
+
+**Фикстуры:**
+Не обнаружены в коде. Предположительно, должны быть реализованы на уровне pytest для создания тестовых данных.
+
+**Покрытие:**
+Не указано. В README упоминается `pytest --cov=src tests/`, что предполагает использование `pytest-cov` для измерения покрытия.
+
+**Запуск:**
+Тесты должны запускаться через:
+- `pytest` (backend)
+- `npm test` (frontend)
+- Через Docker Compose: `docker-compose run --rm backend pytest`
